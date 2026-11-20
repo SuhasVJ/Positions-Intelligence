@@ -85,3 +85,21 @@ body.theme-light .table-pnl-total strong{color:#25334b}
 body.theme-light .pnl-indicator-track{background:#dce3ef;box-shadow:inset 0 1px 3px #263b5b20}
 @media(max-width:900px){.pnl-indicator{width:100%;flex:1 1 100%;order:3}}
 @media(prefers-reduced-motion:reduce){.pnl-indicator-fill{transition:none}}
+
+
+/* Keep the selected-view P&L label and amount together inside the animated bar. */
+.pnl-indicator{flex:1 1 220px;min-width:180px;display:flex;align-items:center;padding:0}
+.pnl-indicator-track{position:relative;width:100%;height:46px;overflow:hidden;border-radius:11px;background:#202b42;border:1px solid #34415c;box-shadow:inset 0 1px 3px #0005}
+.pnl-indicator-fill{position:absolute;inset:0 auto 0 0;height:100%;width:0;border-radius:10px;transition:width .65s cubic-bezier(.22,.8,.25,1),background-color .35s ease,box-shadow .35s ease}
+.pnl-indicator-fill.negative{background:linear-gradient(100deg,#dc2626,#fb7185);box-shadow:0 0 16px #ef444455}
+.pnl-indicator-fill.positive{background:linear-gradient(100deg,#059669,#34d399);box-shadow:0 0 16px #10b98155}
+.pnl-indicator-fill.neutral{background:#64748b;box-shadow:none}
+.pnl-indicator-content{position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 15px;color:#fff;pointer-events:none}
+.pnl-indicator-content span{font-size:10px;font-weight:800;letter-spacing:.12em;text-shadow:0 1px 3px #0008}
+.pnl-indicator-content strong{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px #0008}
+body.theme-light .pnl-indicator-track{background:#e2e8f0;border-color:#cbd5e1;box-shadow:inset 0 1px 3px #263b5b20}
+@media(max-width:900px){.pnl-indicator{width:100%;flex:1 1 100%;order:0}.pnl-indicator-track{height:42px}}
+@media(max-width:480px){.pnl-indicator-content{padding:0 10px}.pnl-indicator-content strong{font-size:16px}}
+@media(prefers-reduced-motion:reduce){.pnl-indicator-fill{transition:none}}
+
+.pnl-indicator-content strong.positive,.pnl-indicator-content strong.negative{color:#fff!important}

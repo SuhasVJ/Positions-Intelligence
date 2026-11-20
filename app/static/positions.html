@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Positions Intelligence</title>
-  <link rel="stylesheet" href="/static/styles.css?v=8">
+  <link rel="stylesheet" href="/static/styles.css?v=9">
 </head>
 <body>
   <main class="container">
@@ -53,9 +53,12 @@
     </section>
     <section class="panel">
       <div class="panel-heading">
-        <div class="pnl-table-title"><h2>Profit &amp; Loss</h2><p class="muted">Sum of Total P&amp;L for the selected positions</p></div>
-        <div class="table-pnl-total"><span>Selected view · Total P&amp;L</span><strong id="tableTotalPnl">—</strong></div>
-        <div class="pnl-indicator" role="img" aria-label="Profit and loss indicator"><div class="pnl-indicator-track"><div class="pnl-indicator-fill" id="pnlIndicatorFill"></div></div></div>
+        <div class="pnl-indicator" role="group" aria-label="Selected positions profit and loss">
+          <div class="pnl-indicator-track">
+            <div class="pnl-indicator-fill" id="pnlIndicatorFill"></div>
+            <div class="pnl-indicator-content"><span>TOTAL P&amp;L</span><strong id="pnlIndicatorValue">—</strong></div>
+          </div>
+        </div>
         <div class="tabs" role="tablist" aria-label="Position type"><button class="tab active" id="netTab" type="button" role="tab" aria-selected="true">Net positions <span id="netTabCount">—</span></button><button class="tab" id="dayTab" type="button" role="tab" aria-selected="false">Today's positions <span id="dayTabCount">—</span></button></div>
       </div>
       <div class="table-wrap"><table>
@@ -73,6 +76,6 @@
       </div>
     </footer>
   </main>
-  <script src="/static/app.js?v=8"></script>
+  <script src="/static/app.js?v=9"></script>
 </body>
 </html>

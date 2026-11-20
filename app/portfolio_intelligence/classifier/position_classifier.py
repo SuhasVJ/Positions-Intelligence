@@ -5,6 +5,7 @@ alone. Missing instrument-master metadata produces UNKNOWN rather than a guess.
 """
 from __future__ import annotations
 
+from datetime import date, datetime
 from typing import Any
 
 INDEX_UNDERLYINGS = {
@@ -66,7 +67,7 @@ def classify_position(position: dict[str, Any],
         "underlying": underlying or None,
         "instrument_type": instrument_type or None,
         "option_type": option_type,
-        "expiry": instrument.get("expiry"),
+        "expiry": _to_iso_or_none(instrument.get("expiry")),
         "strike": _to_float_or_none(instrument.get("strike")),
         "lot_size": _to_int_or_none(instrument.get("lot_size")),
         "classification_status": "CLASSIFIED" if confidence else "UNKNOWN",
@@ -94,3 +95,11 @@ def _to_float_or_none(value: Any) -> float | None:
         return float(value) if value is not None else None
     except (TypeError, ValueError):
         return None
+
+
+def _to_iso_or_none(value: Any) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    return str(value)

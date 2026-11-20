@@ -158,6 +158,23 @@ function initializePositionsPage() {
       if (isOpen) {
         row.classList.add("open-position-row");
         row.setAttribute("aria-label", "Open position");
+        const valueBasis = Number(position.position_value_basis ??
+          Math.abs(Number(position.quantity || 0) * Number(position.average_price || 0)));
+        const multiple = position.pnl_multiple !== undefined
+          ? position.pnl_multiple
+          : (valueBasis > 0 ? Number(position.pnl || 0) / valueBasis : null);
+        const progress = Number(position.pnl_progress_percent ??
+          (multiple === null ? 0 : Math.min(Math.abs(multiple) / 2, 1) * 100));
+        const direction = position.pnl_progress_direction ||
+          (multiple === null ? "UNAVAILABLE" : multiple > 0 ? "PROFIT" : multiple < 0 ? "LOSS" : "FLAT");
+        if (direction === "PROFIT" || direction === "LOSS") {
+          row.classList.add(direction === "PROFIT" ? "pnl-progress-profit" : "pnl-progress-loss");
+          row.style.setProperty("--pnl-progress", Math.max(0, Math.min(progress, 100)) + "%");
+          const scaleTitle = "P&L multiple: " + Number(multiple).toFixed(2) +
+            "x. 1x = P&L equal to position value basis; 2x = 200%. Basis is |net quantity × average price|, not margin used.";
+          row.title = scaleTitle;
+          row.dataset.pnlMultiple = String(multiple);
+        }
       }
       const score = position.intelligence_score ?? position.intelligenceScore ?? null;
       const values = [
@@ -193,7 +210,22 @@ function initializePositionsPage() {
             cell.title = "Intelligence score out of 100.";
           }
         }
-        if (index === 5) setPnlClass(cell, position.pnl);
+        if (index === 5) {
+          setPnlClass(cell, position.pnl);
+          const multiple = position.pnl_multiple;
+          if (isOpen && multiple !== null && multiple !== undefined && Number.isFinite(Number(multiple))) {
+            const amount = document.createElement("span");
+            amount.className = "pnl-row-amount";
+            amount.textContent = value;
+            const multipleLabel = document.createElement("span");
+            multipleLabel.className = "pnl-row-multiple " +
+              (Number(multiple) > 0 ? "positive" : Number(multiple) < 0 ? "negative" : "neutral");
+            multipleLabel.textContent = (Number(multiple) > 0 ? "+" : "") + Number(multiple).toFixed(2) + "x";
+            multipleLabel.title = "P&L multiple. 1x = 100% of position value basis; full bar = 2x.";
+            cell.classList.add("pnl-progress-value");
+            cell.replaceChildren(amount, multipleLabel);
+          }
+        }
         row.appendChild(cell);
       });
       fragment.appendChild(row);

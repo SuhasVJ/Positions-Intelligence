@@ -242,6 +242,8 @@ class KiteService:
         result["quantity"] = int(result.get("quantity") or 0)
         result["buy_quantity"] = int(result.get("buy_quantity") or 0)
         result["sell_quantity"] = int(result.get("sell_quantity") or 0)
+        # Kite's net quantity is the source of truth for whether exposure remains open.
+        result["is_open"] = result["quantity"] != 0
         return result
 
     @staticmethod

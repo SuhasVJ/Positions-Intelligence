@@ -99,6 +99,10 @@ function initializePositionsPage() {
     if (!snapshot) return;
     const positions = snapshot[activeView] || [];
     $("rowCount").textContent = positions.length + (positions.length === 1 ? " position" : " positions");
+    const selectedPnl = positions.reduce((sum, position) => sum + Number(position.pnl || 0), 0);
+    const tableTotal = $("tableTotalPnl");
+    tableTotal.textContent = money(selectedPnl);
+    setPnlClass(tableTotal, selectedPnl);
     $("netTab").classList.toggle("active", activeView === "net");
     $("dayTab").classList.toggle("active", activeView === "day");
     $("netTab").setAttribute("aria-selected", String(activeView === "net"));
@@ -108,7 +112,7 @@ function initializePositionsPage() {
     if (!positions.length) {
       const row = document.createElement("tr");
       const cell = document.createElement("td");
-      cell.colSpan = 9;
+      cell.colSpan = 5;
       cell.className = "empty";
       cell.textContent = activeView === "net" ? "No net positions were returned by Kite." : "No positions recorded for today.";
       row.appendChild(cell);
@@ -120,16 +124,18 @@ function initializePositionsPage() {
     positions.forEach((position) => {
       const row = document.createElement("tr");
       const values = [
-        position.tradingsymbol || "—", position.exchange || "—", position.product || "—",
-        position.quantity ?? 0, money(position.average_price), money(position.last_price),
-        money(position.realised), money(position.unrealised), money(position.pnl)
+        position.tradingsymbol || "—",
+        position.quantity ?? 0,
+        money(position.average_price),
+        money(position.last_price),
+        money(position.pnl)
       ];
       values.forEach((value, index) => {
         const cell = document.createElement("td");
         cell.textContent = value;
         if (index === 0) cell.classList.add("instrument");
-        if (index >= 3) cell.classList.add("number");
-        if (index >= 6) setPnlClass(cell, [position.realised, position.unrealised, position.pnl][index - 6]);
+        if (index > 0) cell.classList.add("number");
+        if (index === 4) setPnlClass(cell, position.pnl);
         row.appendChild(cell);
       });
       fragment.appendChild(row);
@@ -154,7 +160,7 @@ function initializePositionsPage() {
       render(data);
     } catch (error) {
       showError(error.message);
-      $("positionsBody").innerHTML = '<tr><td colspan="9" class="empty">Could not load positions. Check the Kite session and refresh.</td></tr>';
+      $("positionsBody").innerHTML = '<tr><td colspan="5" class="empty">Could not load positions. Check the Kite session and refresh.</td></tr>';
     }
   }
 

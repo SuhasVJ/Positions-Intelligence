@@ -111,7 +111,7 @@ function initializePositionsPage() {
     pnlFill.classList.toggle("positive", selectedPnl > 0);
     pnlFill.classList.toggle("negative", selectedPnl < 0);
     pnlFill.classList.toggle("neutral", selectedPnl === 0);
-    pnlFill.parentElement.parentElement.parentElement.setAttribute(
+    pnlFill.parentElement.parentElement.setAttribute(
       "aria-label",
       selectedPnl > 0 ? "Total profit " + money(selectedPnl) :
         selectedPnl < 0 ? "Total loss " + money(Math.abs(selectedPnl)) : "Total P&L break-even"

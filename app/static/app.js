@@ -152,6 +152,13 @@ function initializePositionsPage() {
     const fragment = document.createDocumentFragment();
     positions.forEach((position) => {
       const row = document.createElement("tr");
+      const isOpen = typeof position.is_open === "boolean"
+        ? position.is_open
+        : Number(position.quantity || 0) !== 0;
+      if (isOpen) {
+        row.classList.add("open-position-row");
+        row.setAttribute("aria-label", "Open position");
+      }
       const score = position.intelligence_score ?? position.intelligenceScore ?? null;
       const values = [
         position.tradingsymbol || "—",
@@ -165,7 +172,16 @@ function initializePositionsPage() {
       values.forEach((value, index) => {
         const cell = document.createElement("td");
         cell.textContent = value;
-        if (index === 0) cell.classList.add("instrument");
+        if (index === 0) {
+          cell.classList.add("instrument");
+          if (isOpen) {
+            const label = document.createElement("span");
+            label.className = "open-position-badge";
+            label.textContent = "OPEN";
+            label.setAttribute("aria-label", "Open position");
+            cell.appendChild(label);
+          }
+        }
         if (index > 0) cell.classList.add("number");
         if (index === 1) {
           cell.classList.add("intelligence-score");

@@ -16,6 +16,13 @@ class KiteServiceTests(unittest.TestCase):
         self.assertEqual(position["average_price"], 120.5)
         self.assertEqual(position["last_price"], 135.0)
         self.assertEqual(position["pnl"], 725.0)
+        self.assertTrue(position["is_open"])
+
+    def test_normalize_position_marks_zero_quantity_as_closed(self):
+        position = KiteService._normalize_position({
+            "tradingsymbol": "NIFTY26NOV25000CE", "quantity": 0,
+        })
+        self.assertFalse(position["is_open"])
 
     def test_summary_aggregates_pnl_and_open_positions(self):
         positions = [

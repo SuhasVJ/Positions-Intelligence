@@ -30,6 +30,23 @@ event_loop: asyncio.AbstractEventLoop | None = None
 
 def make_snapshot() -> dict[str, Any]:
     positions = kite.get_positions()
+    classification_error = None
+    try:
+        positions["day"] = kite.classify_positions(positions["day"])
+        positions["net"] = kite.classify_positions(positions["net"])
+    except Exception as exc:
+        # Classification is additive; positions remain available if metadata refresh fails.
+        classification_error = str(exc)
+        for collection in ("day", "net"):
+            for position in positions[collection]:
+                quantity = int(position.get("quantity") or 0)
+                position.update({
+                    "asset_type": "UNKNOWN",
+                    "direction": "LONG" if quantity > 0 else "SHORT" if quantity < 0 else "FLAT",
+                    "classification_status": "UNKNOWN",
+                    "classification_confidence": 0.0,
+                    "classification_source": "INSTRUMENT_MASTER_UNAVAILABLE",
+                })
     day_summary = kite.summarize(positions["day"])
     net_summary = kite.summarize(positions["net"])
     try:
@@ -73,6 +90,7 @@ def make_snapshot() -> dict[str, Any]:
         "net_summary": net_summary,
         "day_charges": charges,
         "funds": funds,
+        "classification": {"available": classification_error is None, "source": "KITE_INSTRUMENT_MASTER", "error": classification_error},
         "positions": positions["day"],
         "summary": day_summary,
     }
@@ -301,6 +319,29 @@ async def today_positions():
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Kite API error: {exc}") from exc
 
+
+@app.get("/api/intelligence/positions")
+async def intelligence_positions():
+    """Return open net positions with deterministic PI-1 classification."""
+    if not kite.authenticated:
+        raise HTTPException(status_code=401, detail="Kite session is not authenticated. Complete the Kite login flow first.")
+    try:
+        data = read_snapshot()
+        if data is None:
+            data = await run_in_threadpool(make_snapshot)
+            store_snapshot(data)
+        open_positions = [p for p in data.get("net", []) if int(p.get("quantity") or 0) != 0]
+        classified_count = sum(1 for p in open_positions if p.get("classification_status") == "CLASSIFIED")
+        return {
+            "as_of": data.get("as_of"),
+            "position_count": len(open_positions),
+            "classified_count": classified_count,
+            "unknown_count": len(open_positions) - classified_count,
+            "scoring_status": "NOT_EVALUATED",
+            "positions": open_positions,
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Position intelligence error: {exc}") from exc
 
 @app.get("/api/funds")
 async def account_funds():

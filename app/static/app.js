@@ -141,7 +141,7 @@ function initializePositionsPage() {
     if (!positions.length) {
       const row = document.createElement("tr");
       const cell = document.createElement("td");
-      cell.colSpan = 5;
+      cell.colSpan = 6;
       cell.className = "empty";
       cell.textContent = activeView === "net" ? "No net positions were returned by Kite." : "No positions recorded for today.";
       row.appendChild(cell);
@@ -152,8 +152,11 @@ function initializePositionsPage() {
     const fragment = document.createDocumentFragment();
     positions.forEach((position) => {
       const row = document.createElement("tr");
+      const score = position.intelligence_score ?? position.intelligenceScore ?? null;
       const values = [
         position.tradingsymbol || "—",
+        score === null || score === undefined ? "Pending" :
+          (typeof score === "number" ? Math.round(score) + "/100" : String(score)),
         position.quantity ?? 0,
         money(position.average_price),
         money(position.last_price),
@@ -164,7 +167,17 @@ function initializePositionsPage() {
         cell.textContent = value;
         if (index === 0) cell.classList.add("instrument");
         if (index > 0) cell.classList.add("number");
-        if (index === 4) setPnlClass(cell, position.pnl);
+        if (index === 1) {
+          cell.classList.add("intelligence-score");
+          if (score === null || score === undefined) {
+            cell.classList.add("score-pending");
+            cell.title = "Intelligence scoring model is not connected yet.";
+          } else if (typeof score === "number") {
+            cell.classList.add(score >= 70 ? "score-high" : score >= 40 ? "score-medium" : "score-low");
+            cell.title = "Intelligence score out of 100.";
+          }
+        }
+        if (index === 5) setPnlClass(cell, position.pnl);
         row.appendChild(cell);
       });
       fragment.appendChild(row);
@@ -189,7 +202,7 @@ function initializePositionsPage() {
       render(data);
     } catch (error) {
       showError(error.message);
-      $("positionsBody").innerHTML = '<tr><td colspan="5" class="empty">Could not load positions. Check the Kite session and refresh.</td></tr>';
+      $("positionsBody").innerHTML = '<tr><td colspan="6" class="empty">Could not load positions. Check the Kite session and refresh.</td></tr>';
     }
   }
 

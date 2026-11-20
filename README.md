@@ -61,3 +61,39 @@ The dashboard defaults to Kite's `net` collection and provides a separate `day` 
 - The positions dashboard displays equity and commodity balances separately. These segment balances are not combined into one spendable cash figure.
 - Funds are included in the `/api/positions/all` REST snapshot and `/ws/positions` WebSocket payload. They refresh on the configured account snapshot interval (`POSITION_REFRESH_SECONDS`, default 30 seconds), not on every market tick.
 - Data source: Kite Connect `GET /user/margins`. This is a read-only account margin snapshot, not a bank ledger or withdrawal balance.
+
+
+## PortfolioIntelligence architecture
+
+PortfolioIntelligence is a read-only analysis layer over the broker position snapshot and shared KiteTicker feed. It uses specialized evaluators per asset class and a common, explainable result contract. The selected scoring approach is hybrid: deterministic rules and quantitative analytics produce the score; AI-generated explanations may summarize those results but must not invent missing inputs. Adaptive scoring is event-driven, with tick updates marking affected positions dirty and configurable throttling before recalculation.
+
+### Position Intelligence milestones
+
+- **PI-1 — Position classification (current):** enrich positions using Kite's instrument master; classify equity, index options, stock options, index futures, stock futures, commodity options and commodity futures; normalize long/short/flat direction; expose classified open net positions.
+- **PI-2 — Shared analytics:** reusable trend, momentum, volatility, liquidity and risk/reward features with explicit data freshness.
+- **PI-3 — Equity and futures scorers:** asset-specific deterministic scoring and component explanations.
+- **PI-4 — Options scorer:** directional Greeks, IV, theta, gamma, expiry and liquidity-aware scoring.
+- **PI-5 — Commodity scorer:** MCX-specific contract, expiry, liquidity and volatility treatment.
+- **PI-6 — Adaptive live scoring:** reuse KiteTicker ticks, throttle material recalculations and publish score events over WebSocket.
+- **PI-7 — Portfolio-level intelligence:** concentration, correlation, combined exposure and strategy/hedge grouping.
+- **PI-8 — Validation and calibration:** historical replay, regression fixtures, score stability and model-version tracking.
+
+### PI-1 classification contract
+
+- Kite instrument-master metadata is cached in process and keyed by `(exchange, tradingsymbol)`; positions are never classified from symbol text alone.
+- A missing or unsupported instrument mapping is returned as `UNKNOWN` with zero classification confidence. It is not assigned a fabricated asset class.
+- Direction is based on signed net quantity: positive = `LONG`, negative = `SHORT`, zero = `FLAT`.
+- `GET /api/intelligence/positions` returns open net positions with classification metadata and classification coverage counts.
+- The existing `/ws/positions` event includes the enriched classifications because the same classified snapshot is broadcast to the existing dashboard. Dedicated score events and adaptive scoring are deferred to PI-6.
+- PI-1 does not calculate an intelligence score. The API explicitly returns `scoring_status: NOT_EVALUATED` until the required analytics and scorer milestones are implemented.
+- Instrument metadata can be invalidated and refreshed after a broker instrument-master rollover.
+
+### PI-1 tests
+
+Run the regression suite with:
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
+PI-1 tests cover all supported asset classes, long/short/flat direction, unknown metadata, cached instrument-master lookup, and the authenticated open-position intelligence endpoint.

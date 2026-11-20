@@ -210,3 +210,35 @@ body.theme-light .pnl-row-multiple.neutral { color: #475569; background: #e2e8f0
   tbody tr.open-position-row.pnl-progress-profit,
   tbody tr.open-position-row.pnl-progress-loss { transition: none; }
 }
+
+
+/* Keep the live P&L fill subtle so it does not overpower the open-row state. */
+tbody tr.open-position-row.pnl-progress-profit {
+  background-image: linear-gradient(90deg,
+    rgba(16,185,129,.12) 0,
+    rgba(16,185,129,.12) var(--pnl-progress),
+    transparent var(--pnl-progress),
+    transparent 100%);
+}
+tbody tr.open-position-row.pnl-progress-loss {
+  background-image: linear-gradient(90deg,
+    rgba(244,63,94,.12) 0,
+    rgba(244,63,94,.12) var(--pnl-progress),
+    transparent var(--pnl-progress),
+    transparent 100%);
+}
+body.theme-light tbody tr.open-position-row.pnl-progress-profit {
+  background-image: linear-gradient(90deg,
+    rgba(16,185,129,.10) 0,
+    rgba(16,185,129,.10) var(--pnl-progress),
+    transparent var(--pnl-progress),
+    transparent 100%);
+}
+body.theme-light tbody tr.open-position-row.pnl-progress-loss {
+  background-image: linear-gradient(90deg,
+    rgba(244,63,94,.10) 0,
+    rgba(244,63,94,.10) var(--pnl-progress),
+    transparent var(--pnl-progress),
+    transparent 100%);
+}
+.pnl-row-multiple { font-size: 8px; padding: 2px 4px; margin-left: 6px; }

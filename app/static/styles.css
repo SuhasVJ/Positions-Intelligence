@@ -101,3 +101,5 @@ body.theme-light .pnl-indicator-track{background:#e2e8f0;border-color:#cbd5e1;bo
 @media(max-width:900px){.pnl-indicator{width:100%;flex:1 1 100%;order:0}.pnl-indicator-track{height:42px}}
 @media(max-width:480px){.pnl-indicator-content{padding:0 10px}.pnl-indicator-content strong{font-size:16px}}
 @media(prefers-reduced-motion:reduce){.pnl-indicator-fill{transition:none}}
+
+.pnl-indicator-content strong.positive,.pnl-indicator-content strong.negative{color:#fff!important}

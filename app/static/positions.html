@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Positions Intelligence</title>
-  <link rel="stylesheet" href="/static/styles.css?v=6">
+  <link rel="stylesheet" href="/static/styles.css?v=7">
 </head>
 <body>
   <main class="container">
@@ -53,12 +53,13 @@
     </section>
     <section class="panel">
       <div class="panel-heading">
-        <div><p class="eyebrow">PORTFOLIO MONITOR</p><h2>Positions</h2><p class="muted">Switch between all carry-forward net positions and today's intraday activity.</p></div>
+        <div class="pnl-table-title"><h2>Profit &amp; Loss</h2><p class="muted">Sum of Total P&amp;L for the selected positions</p></div>
+        <div class="table-pnl-total"><span>Selected view · Total P&amp;L</span><strong id="tableTotalPnl">—</strong></div>
         <div class="tabs" role="tablist" aria-label="Position type"><button class="tab active" id="netTab" type="button" role="tab" aria-selected="true">Net positions <span id="netTabCount">—</span></button><button class="tab" id="dayTab" type="button" role="tab" aria-selected="false">Today's positions <span id="dayTabCount">—</span></button></div>
       </div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Instrument</th><th>Exchange</th><th>Product</th><th class="number">Net qty</th><th class="number">Avg. price</th><th class="number">LTP</th><th class="number">Realised P&amp;L</th><th class="number">Unrealised P&amp;L</th><th class="number">Total P&amp;L</th></tr></thead>
-        <tbody id="positionsBody"><tr><td colspan="9" class="empty">Loading positions…</td></tr></tbody>
+        <thead><tr><th>Instrument</th><th class="number">Net qty</th><th class="number">Avg. price</th><th class="number">LTP</th><th class="number">Total P&amp;L</th></tr></thead>
+        <tbody id="positionsBody"><tr><td colspan="5" class="empty">Loading positions…</td></tr></tbody>
       </table></div>
       <div class="table-footer"><span id="rowCount">0 positions</span><span id="feedStatus">Connecting to live updates…</span></div>
     </section>
@@ -71,6 +72,6 @@
       </div>
     </footer>
   </main>
-  <script src="/static/app.js?v=6"></script>
+  <script src="/static/app.js?v=7"></script>
 </body>
 </html>

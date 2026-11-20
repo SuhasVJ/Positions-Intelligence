@@ -15,7 +15,9 @@ def add_pnl_progress(position: dict[str, Any]) -> dict[str, Any]:
     value_basis = abs(quantity * average_price)
 
     multiple = pnl / value_basis if value_basis > 0 and quantity != 0 else None
-    progress_percent = min(abs(multiple) / 2.0, 1.0) * 100 if multiple is not None else 0.0
+    # Requested asymmetric scale: max loss is -1x basis; +1x and +2x profit map to 50% and 100%.
+    progress_limit = 1.0 if multiple is not None and multiple < 0 else 2.0
+    progress_percent = min(abs(multiple) / progress_limit, 1.0) * 100 if multiple is not None else 0.0
     direction = "PROFIT" if pnl > 0 else "LOSS" if pnl < 0 else "FLAT"
 
     position.update({

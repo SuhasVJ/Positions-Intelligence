@@ -53,7 +53,7 @@ function initializePositionsPage() {
 
   function renderSummary(data) {
     const summary = data.net_summary;
-    const today = data.day_summary || { realised: 0 };
+    const today = data.day_pnl || data.day_summary || { realised: 0 };
     [["totalPnl", summary.pnl], ["realised", today.realised], ["unrealised", summary.unrealised]]
       .forEach(([id, value]) => {
         const node = $(id);
@@ -161,6 +161,22 @@ function initializePositionsPage() {
     };
     socket.onerror = () => socket.close();
   }
+
+  function applyTheme(theme) {
+    const light = theme === "light";
+    document.body.classList.toggle("theme-light", light);
+    const button = $("themeToggle");
+    button.textContent = light ? "Switch to dark theme" : "Switch to light theme";
+    button.setAttribute("aria-label", light ? "Switch to dark theme" : "Switch to light theme");
+  }
+
+  const savedTheme = localStorage.getItem("positions-intelligence-theme") || "dark";
+  applyTheme(savedTheme);
+  $("themeToggle").addEventListener("click", () => {
+    const nextTheme = document.body.classList.contains("theme-light") ? "dark" : "light";
+    localStorage.setItem("positions-intelligence-theme", nextTheme);
+    applyTheme(nextTheme);
+  });
 
   $("netTab").addEventListener("click", () => { activeView = "net"; renderTable(); });
   $("dayTab").addEventListener("click", () => { activeView = "day"; renderTable(); });

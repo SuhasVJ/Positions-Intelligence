@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Positions Intelligence</title>
-  <link rel="stylesheet" href="/static/styles.css?v=9">
+  <link rel="stylesheet" href="/static/styles.css?v=10">
 </head>
 <body>
   <main class="container">
@@ -53,10 +53,17 @@
     </section>
     <section class="panel">
       <div class="panel-heading">
-        <div class="pnl-indicator" role="group" aria-label="Selected positions profit and loss">
-          <div class="pnl-indicator-track">
-            <div class="pnl-indicator-fill" id="pnlIndicatorFill"></div>
-            <div class="pnl-indicator-content"><span>TOTAL P&amp;L</span><strong id="pnlIndicatorValue">—</strong></div>
+        <div class="pnl-indicator" role="group" aria-label="Selected positions profit and loss breakdown">
+          <div class="pnl-breakdown">
+            <div class="pnl-breakdown-values">
+              <div class="pnl-stat profit"><span>PROFIT</span><strong id="pnlGrossProfit">—</strong></div>
+              <div class="pnl-stat loss"><span>LOSS</span><strong id="pnlGrossLoss">—</strong></div>
+              <div class="pnl-stat net"><span>NET P&amp;L</span><strong id="pnlIndicatorValue">—</strong></div>
+            </div>
+            <div class="pnl-split-track" role="img" aria-label="Profit and loss distribution">
+              <div class="pnl-split-profit" id="pnlProfitSegment"></div>
+              <div class="pnl-split-loss" id="pnlLossSegment"></div>
+            </div>
           </div>
         </div>
         <div class="tabs" role="tablist" aria-label="Position type"><button class="tab active" id="netTab" type="button" role="tab" aria-selected="true">Net positions <span id="netTabCount">—</span></button><button class="tab" id="dayTab" type="button" role="tab" aria-selected="false">Today's positions <span id="dayTabCount">—</span></button></div>
@@ -76,6 +83,6 @@
       </div>
     </footer>
   </main>
-  <script src="/static/app.js?v=9"></script>
+  <script src="/static/app.js?v=10"></script>
 </body>
 </html>

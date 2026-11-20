@@ -110,6 +110,9 @@ function initializePositionsPage() {
   function render(data) {
     snapshot = data;
     $("asOf").textContent = "Last updated: " + new Date(data.as_of).toLocaleString("en-IN");
+    const feed = data.price_feed === "KiteTicker" ? "Live prices · KiteTicker" : "WebSocket connected · REST snapshot";
+    $("connection").innerHTML = "<i></i> " + feed;
+    $("connection").classList.add("connected");
     renderSummary(data);
     renderTable();
     showError("");

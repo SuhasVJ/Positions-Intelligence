@@ -160,9 +160,11 @@ function initializePositionsPage() {
         row.setAttribute("aria-label", "Open position");
         const valueBasis = Number(position.position_value_basis ??
           Math.abs(Number(position.quantity || 0) * Number(position.average_price || 0)));
+        const openPnl = position.unrealised === undefined || position.unrealised === null
+          ? null : Number(position.unrealised);
         const multiple = position.pnl_multiple !== undefined
           ? position.pnl_multiple
-          : (valueBasis > 0 ? Number(position.pnl || 0) / valueBasis : null);
+          : (valueBasis > 0 && openPnl !== null && Number.isFinite(openPnl) ? openPnl / valueBasis : null);
         const progress = Number(position.pnl_progress_percent ??
           (multiple === null ? 0 : Math.min(Math.abs(multiple) / (Number(multiple) < 0 ? 1 : 2), 1) * 100));
         const direction = position.pnl_progress_direction ||
@@ -171,7 +173,7 @@ function initializePositionsPage() {
           row.classList.add(direction === "PROFIT" ? "pnl-progress-profit" : "pnl-progress-loss");
           row.style.setProperty("--pnl-progress", Math.max(0, Math.min(progress, 100)) + "%");
           const scaleTitle = "P&L multiple: " + Number(multiple).toFixed(2) +
-            "x. Red reaches full at -1x; green reaches 50% at +1x and full at +2x. Basis is |net quantity × average price|, not margin used.";
+            "x open P&L multiple, calculated from unrealised P&L only. Total P&L can also include realised P&L from earlier exits.";
           row.title = scaleTitle;
           row.dataset.pnlMultiple = String(multiple);
         }
@@ -221,7 +223,7 @@ function initializePositionsPage() {
             multipleLabel.className = "pnl-row-multiple " +
               (Number(multiple) > 0 ? "positive" : Number(multiple) < 0 ? "negative" : "neutral");
             multipleLabel.textContent = (Number(multiple) > 0 ? "+" : "") + Number(multiple).toFixed(2) + "x";
-            multipleLabel.title = "P&L multiple. Red full = -1x; green half = +1x; green full = +2x.";
+            multipleLabel.title = "Open P&L multiple, based on unrealised P&L only. Total P&L shown beside it includes realised and unrealised P&L.";
             cell.classList.add("pnl-progress-value");
             cell.replaceChildren(amount, multipleLabel);
           }

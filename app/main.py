@@ -113,6 +113,12 @@ async def auth_login():
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
+@app.get("/logout", include_in_schema=False)
+async def logout():
+    kite.clear_session()
+    return RedirectResponse(url="/", status_code=303)
+
+
 @app.get("/api/positions/intelligence", include_in_schema=False)
 async def positions_intelligence():
     if not kite.authenticated:

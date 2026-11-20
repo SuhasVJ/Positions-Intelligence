@@ -4,30 +4,33 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Positions Intelligence</title>
-  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/styles.css?v=2">
 </head>
 <body>
   <main class="container">
-    <header>
-      <div><h1>Today's Positions</h1><p class="muted" id="asOf">Connecting to Kite…</p></div>
-      <div class="actions"><span class="status" id="connection">Connecting</span><button class="secondary" id="logoutButton">Logout</button></div>
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark">PI</div><div><p class="eyebrow">ZERODHA KITE CONNECT</p><h1>Positions Intelligence</h1><p class="muted" id="asOf">Connecting to Kite…</p></div></div>
+      <div class="actions"><span class="status" id="connection"><i></i> Connecting</span><button class="button button-light" id="refreshButton" type="button">Refresh</button><button class="button button-outline" id="logoutButton" type="button">Logout</button></div>
     </header>
-    <section class="summary">
-      <article><span>Total P&amp;L</span><strong id="totalPnl">—</strong></article>
-      <article><span>Realised</span><strong id="realised">—</strong></article>
-      <article><span>Unrealised</span><strong id="unrealised">—</strong></article>
-      <article><span>Open positions</span><strong id="openCount">—</strong></article>
+    <section class="summary" aria-label="Net position summary">
+      <article class="metric metric-primary"><span>Net P&amp;L</span><strong id="totalPnl">—</strong><small>All net positions</small></article>
+      <article class="metric"><span>Realised P&amp;L</span><strong id="realised">—</strong><small>Booked profit / loss</small></article>
+      <article class="metric"><span>Unrealised P&amp;L</span><strong id="unrealised">—</strong><small>Open position profit / loss</small></article>
+      <article class="metric"><span>Open positions</span><strong id="openCount">—</strong><small id="netCount">Net positions</small></article>
     </section>
     <section class="panel">
-      <div class="panel-heading"><h2>Day positions</h2><span class="muted" id="rowCount">0 positions</span></div>
+      <div class="panel-heading">
+        <div><p class="eyebrow">PORTFOLIO MONITOR</p><h2>Positions</h2><p class="muted">Switch between all carry-forward net positions and today's intraday activity.</p></div>
+        <div class="tabs" role="tablist" aria-label="Position type"><button class="tab active" id="netTab" type="button" role="tab" aria-selected="true">Net positions <span id="netTabCount">—</span></button><button class="tab" id="dayTab" type="button" role="tab" aria-selected="false">Today's positions <span id="dayTabCount">—</span></button></div>
+      </div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Instrument</th><th>Exchange</th><th>Product</th><th class="number">Qty</th><th class="number">Avg. price</th><th class="number">LTP</th><th class="number">Realised</th><th class="number">Unrealised</th><th class="number">P&amp;L</th></tr></thead>
-        <tbody id="positionsBody"><tr><td colspan="9" class="empty">Loading today's positions…</td></tr></tbody>
+        <thead><tr><th>Instrument</th><th>Exchange</th><th>Product</th><th class="number">Net qty</th><th class="number">Avg. price</th><th class="number">LTP</th><th class="number">Realised P&amp;L</th><th class="number">Unrealised P&amp;L</th><th class="number">Total P&amp;L</th></tr></thead>
+        <tbody id="positionsBody"><tr><td colspan="9" class="empty">Loading positions…</td></tr></tbody>
       </table></div>
+      <div class="table-footer"><span id="rowCount">0 positions</span><span>Read-only monitoring · Live updates via WebSocket</span></div>
     </section>
-    <p class="muted">Read-only monitoring · Refreshes automatically</p>
     <p class="error" id="error" role="alert"></p>
   </main>
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=2"></script>
 </body>
 </html>

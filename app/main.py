@@ -33,6 +33,17 @@ def make_snapshot() -> dict[str, Any]:
     day_summary = kite.summarize(positions["day"])
     net_summary = kite.summarize(positions["net"])
     try:
+        day_pnl = kite.get_day_margins_pnl()
+    except Exception as exc:
+        # Position-level values are a fallback if the margins endpoint is unavailable.
+        day_pnl = {
+            "realised": day_summary["realised"],
+            "unrealised": day_summary["unrealised"],
+            "source": "positions_fallback",
+            "warning": str(exc),
+            "segments": {},
+        }
+    try:
         charges = kite.get_day_charges()
     except Exception as exc:
         # Keep position monitoring available if the optional charges endpoint fails.
@@ -45,6 +56,7 @@ def make_snapshot() -> dict[str, Any]:
         "day": positions["day"],
         "net": positions["net"],
         "day_summary": day_summary,
+        "day_pnl": day_pnl,
         "net_summary": net_summary,
         "day_charges": charges,
         "positions": positions["day"],

@@ -4,14 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Positions Intelligence</title>
-  <link rel="stylesheet" href="/static/styles.css?v=2">
+  <link rel="stylesheet" href="/static/styles.css?v=3">
 </head>
 <body>
   <main class="container">
-    <header class="topbar">
-      <div class="brand"><div class="brand-mark">PI</div><div><p class="eyebrow">ZERODHA KITE CONNECT</p><h1>Positions Intelligence</h1><p class="muted" id="asOf">Connecting to Kite…</p></div></div>
-      <div class="actions"><span class="status" id="connection"><i></i> Connecting</span><button class="button button-light" id="refreshButton" type="button">Refresh</button><button class="button button-outline" id="logoutButton" type="button">Logout</button></div>
-    </header>
     <section class="summary" aria-label="Net position summary">
       <article class="metric metric-primary"><span>Net P&amp;L</span><strong id="totalPnl">—</strong><small>All net positions</small></article>
       <article class="metric"><span>Realised P&amp;L</span><strong id="realised">—</strong><small>Booked profit / loss</small></article>
@@ -27,10 +23,14 @@
         <thead><tr><th>Instrument</th><th>Exchange</th><th>Product</th><th class="number">Net qty</th><th class="number">Avg. price</th><th class="number">LTP</th><th class="number">Realised P&amp;L</th><th class="number">Unrealised P&amp;L</th><th class="number">Total P&amp;L</th></tr></thead>
         <tbody id="positionsBody"><tr><td colspan="9" class="empty">Loading positions…</td></tr></tbody>
       </table></div>
-      <div class="table-footer"><span id="rowCount">0 positions</span><span>Read-only monitoring · Live updates via WebSocket</span></div>
+      <div class="table-footer"><span id="rowCount">0 positions</span><span id="feedStatus">Connecting to live updates…</span></div>
     </section>
     <p class="error" id="error" role="alert"></p>
+    <footer class="page-footer">
+      <span class="footer-note">Positions Intelligence · Read-only monitoring</span>
+      <button class="button button-outline" id="logoutButton" type="button">Logout</button>
+    </footer>
   </main>
-  <script src="/static/app.js?v=2"></script>
+  <script src="/static/app.js?v=3"></script>
 </body>
 </html>

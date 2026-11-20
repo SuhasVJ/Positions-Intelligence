@@ -75,8 +75,29 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
+async def complete_kite_login(request_token: str | None, status: str | None):
+    if status == "cancel":
+        return RedirectResponse(url="/?login=cancelled", status_code=303)
+    if status != "success" or not request_token:
+        return RedirectResponse(url="/?login=failed", status_code=303)
+    try:
+        # Exchange the short-lived request token immediately; never persist or log it.
+        await run_in_threadpool(kite.create_session, request_token)
+    except Exception:
+        return RedirectResponse(url="/?login=failed", status_code=303)
+    # Strip the request token and all Kite query parameters from the browser URL.
+    return RedirectResponse(url="/api/positions/intelligence", status_code=303)
+
+
 @app.get("/", include_in_schema=False)
-async def login_page():
+async def login_page(
+    request_token: str | None = None,
+    status: str | None = None,
+    action: str | None = None,
+):
+    # Kite commonly redirects to the configured root URL with OAuth query parameters.
+    if request_token or action == "login":
+        return await complete_kite_login(request_token, status)
     if kite.authenticated:
         return RedirectResponse(url="/api/positions/intelligence", status_code=303)
     return FileResponse("app/static/index.html")
@@ -84,15 +105,7 @@ async def login_page():
 
 @app.get("/auth/callback", include_in_schema=False)
 async def auth_callback(request_token: str | None = None, status: str | None = None):
-    if status == "cancel":
-        return RedirectResponse(url="/?login=cancelled", status_code=303)
-    if not request_token:
-        raise HTTPException(status_code=400, detail="Kite request_token is missing.")
-    try:
-        await run_in_threadpool(kite.create_session, request_token)
-    except Exception as exc:
-        raise HTTPException(status_code=401, detail=f"Kite authentication failed: {exc}") from exc
-    return RedirectResponse(url="/api/positions/intelligence", status_code=303)
+    return await complete_kite_login(request_token, status)
 
 
 @app.get("/api/health")

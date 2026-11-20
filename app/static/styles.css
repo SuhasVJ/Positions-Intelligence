@@ -42,3 +42,23 @@ body.theme-light .button-outline{border-color:#c6d0e1;color:#34435d;background:#
 body.theme-light .button-outline:hover{background:#f0f4fb}
 body.theme-light .empty{color:#71809a!important}
 body.theme-light .error{color:#c6284b}
+
+.funds-panel{margin:0 0 14px;padding:13px 15px;background:linear-gradient(145deg,#111a2d,#101729);border:1px solid #27334c;border-radius:12px}
+.funds-heading{display:flex;justify-content:space-between;gap:12px;color:#dce5f8;font-size:12px}
+.funds-heading span,.funds-note{color:#7888a5;font-size:10px}
+.funds-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+.funds-segment{padding:10px 12px;border:1px solid #293650;border-radius:9px;background:#ffffff04}
+.funds-segment h3{margin:0 0 9px;color:#a78bfa;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.funds-values{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.funds-values div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.funds-values span{color:#8494b2;font-size:10px}
+.funds-values strong{color:#e8eefb;font-size:13px;font-variant-numeric:tabular-nums}
+.funds-note{margin:9px 0 0}
+body.theme-light .funds-panel{background:#fff;border-color:#d8e0ef}
+body.theme-light .funds-heading{color:#24324b}
+body.theme-light .funds-heading span,body.theme-light .funds-note{color:#71809a}
+body.theme-light .funds-segment{border-color:#dce4f0;background:#f8faff}
+body.theme-light .funds-segment h3{color:#6845b5}
+body.theme-light .funds-values span{color:#66758f}
+body.theme-light .funds-values strong{color:#202d43}
+@media(max-width:800px){.funds-grid{grid-template-columns:1fr}.funds-values{grid-template-columns:repeat(2,minmax(0,1fr))}}

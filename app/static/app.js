@@ -100,9 +100,9 @@ function initializePositionsPage() {
     const positions = snapshot[activeView] || [];
     $("rowCount").textContent = positions.length + (positions.length === 1 ? " position" : " positions");
     const selectedPnl = positions.reduce((sum, position) => sum + Number(position.pnl || 0), 0);
-    const tableTotal = $("tableTotalPnl");
-    tableTotal.textContent = money(selectedPnl);
-    setPnlClass(tableTotal, selectedPnl);
+    const pnlValue = $("pnlIndicatorValue");
+    pnlValue.textContent = money(selectedPnl);
+    setPnlClass(pnlValue, selectedPnl);
 
     // Scale the visual fill to ₹10,000; cap at 100% while colour communicates direction.
     const pnlFill = $("pnlIndicatorFill");
@@ -111,10 +111,10 @@ function initializePositionsPage() {
     pnlFill.classList.toggle("positive", selectedPnl > 0);
     pnlFill.classList.toggle("negative", selectedPnl < 0);
     pnlFill.classList.toggle("neutral", selectedPnl === 0);
-    pnlFill.parentElement.parentElement.setAttribute(
+    pnlFill.parentElement.parentElement.parentElement.setAttribute(
       "aria-label",
-      selectedPnl > 0 ? "Profit " + money(selectedPnl) :
-        selectedPnl < 0 ? "Loss " + money(Math.abs(selectedPnl)) : "Break-even"
+      selectedPnl > 0 ? "Total profit " + money(selectedPnl) :
+        selectedPnl < 0 ? "Total loss " + money(Math.abs(selectedPnl)) : "Total P&L break-even"
     );
     $("netTab").classList.toggle("active", activeView === "net");
     $("dayTab").classList.toggle("active", activeView === "day");

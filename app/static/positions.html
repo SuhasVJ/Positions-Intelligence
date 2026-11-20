@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Positions Intelligence</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <main class="container">
+    <header>
+      <div><h1>Today's Positions</h1><p class="muted" id="asOf">Connecting to Kite…</p></div>
+      <div class="actions"><span class="status" id="connection">Connecting</span><button class="secondary" id="logoutButton">Logout</button></div>
+    </header>
+    <section class="summary">
+      <article><span>Total P&amp;L</span><strong id="totalPnl">—</strong></article>
+      <article><span>Realised</span><strong id="realised">—</strong></article>
+      <article><span>Unrealised</span><strong id="unrealised">—</strong></article>
+      <article><span>Open positions</span><strong id="openCount">—</strong></article>
+    </section>
+    <section class="panel">
+      <div class="panel-heading"><h2>Day positions</h2><span class="muted" id="rowCount">0 positions</span></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Instrument</th><th>Exchange</th><th>Product</th><th class="number">Qty</th><th class="number">Avg. price</th><th class="number">LTP</th><th class="number">Realised</th><th class="number">Unrealised</th><th class="number">P&amp;L</th></tr></thead>
+        <tbody id="positionsBody"><tr><td colspan="9" class="empty">Loading today's positions…</td></tr></tbody>
+      </table></div>
+    </section>
+    <p class="muted">Read-only monitoring · Refreshes automatically</p>
+    <p class="error" id="error" role="alert"></p>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

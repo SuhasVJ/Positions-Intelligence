@@ -13,12 +13,18 @@ class PositionPnlProgressTests(unittest.TestCase):
         self.assertEqual(result["pnl_progress_direction"], "PROFIT")
 
     def test_loss_uses_red_direction_and_absolute_progress(self):
-        position = {"quantity": -5, "average_price": 200, "pnl": -1000}
+        position = {"quantity": -5, "average_price": 200, "pnl": -500}
         result = add_pnl_progress(position)
         self.assertEqual(result["position_value_basis"], 1000)
-        self.assertEqual(result["pnl_multiple"], -1.0)
+        self.assertEqual(result["pnl_multiple"], -0.5)
         self.assertEqual(result["pnl_progress_percent"], 50.0)
         self.assertEqual(result["pnl_progress_direction"], "LOSS")
+
+    def test_full_position_value_loss_fills_the_red_bar(self):
+        position = {"quantity": 5, "average_price": 200, "pnl": -1000}
+        result = add_pnl_progress(position)
+        self.assertEqual(result["pnl_multiple"], -1.0)
+        self.assertEqual(result["pnl_progress_percent"], 100.0)
 
     def test_progress_caps_at_two_times(self):
         position = {"quantity": 2, "average_price": 50, "pnl": 500}

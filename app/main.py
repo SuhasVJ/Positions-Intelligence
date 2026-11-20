@@ -44,6 +44,10 @@ def make_snapshot() -> dict[str, Any]:
             "segments": {},
         }
     try:
+        funds = kite.get_funds()
+    except Exception as exc:
+        funds = {"available": False, "segments": {}, "total": {}, "error": str(exc)}
+    try:
         charges = kite.get_day_charges()
     except Exception as exc:
         # Keep position monitoring available if the optional charges endpoint fails.
@@ -59,6 +63,7 @@ def make_snapshot() -> dict[str, Any]:
         "day_pnl": day_pnl,
         "net_summary": net_summary,
         "day_charges": charges,
+        "funds": funds,
         "positions": positions["day"],
         "summary": day_summary,
     }

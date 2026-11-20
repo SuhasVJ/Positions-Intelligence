@@ -8,11 +8,24 @@
 </head>
 <body>
   <main class="container">
-    <section class="summary" aria-label="Net position summary">
+    <section class="summary" aria-label="Position and daily trading summary">
       <article class="metric metric-primary"><span>Net P&amp;L</span><strong id="totalPnl">—</strong><small>All net positions</small></article>
-      <article class="metric"><span>Realised P&amp;L</span><strong id="realised">—</strong><small>Booked profit / loss</small></article>
+      <article class="metric"><span>Realised P&amp;L Today</span><strong id="realised">—</strong><small>Booked profit / loss today</small></article>
       <article class="metric"><span>Unrealised P&amp;L</span><strong id="unrealised">—</strong><small>Open position profit / loss</small></article>
       <article class="metric"><span>Open positions</span><strong id="openCount">—</strong><small id="netCount">Net positions</small></article>
+      <article class="metric"><span>Charges Today</span><strong id="chargesTotal">—</strong><small id="chargesHint">Estimated from executed trades</small></article>
+    </section>
+    <section class="charges-panel" aria-label="Today's charges breakdown">
+      <div class="charges-heading"><strong>Today's charges breakdown</strong><span id="chargesTradeCount">—</span></div>
+      <div class="charges-breakdown">
+        <div><span>Brokerage</span><strong id="chargeBrokerage">—</strong></div>
+        <div><span>STT / CTT</span><strong id="chargeTax">—</strong></div>
+        <div><span>Exchange</span><strong id="chargeExchange">—</strong></div>
+        <div><span>SEBI</span><strong id="chargeSebi">—</strong></div>
+        <div><span>Stamp duty</span><strong id="chargeStamp">—</strong></div>
+        <div><span>GST</span><strong id="chargeGst">—</strong></div>
+      </div>
+      <p class="charges-note">Estimated using Kite virtual contract note; final contract-note charges may differ.</p>
     </section>
     <section class="panel">
       <div class="panel-heading">

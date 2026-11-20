@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 from threading import RLock
 from typing import Any
 
@@ -6,7 +7,7 @@ from kiteconnect import KiteConnect
 
 
 class KiteService:
-    """Small read-only wrapper around the Kite Connect positions API."""
+    """Small read-only wrapper around the Kite Connect positions and charges APIs."""
 
     def __init__(self) -> None:
         self.api_key = os.getenv("KITE_API_KEY", "").strip()
@@ -28,6 +29,10 @@ class KiteService:
     def authenticated(self) -> bool:
         return bool(self._client and self._access_token)
 
+    @property
+    def ticker_credentials(self) -> tuple[str, str] | None:
+        return (self.api_key, self._access_token) if self.authenticated else None
+
     def clear_session(self) -> None:
         with self._lock:
             self._access_token = ""
@@ -44,17 +49,14 @@ class KiteService:
             raise RuntimeError("KITE_API_KEY is not configured.")
         if not self.api_secret:
             raise RuntimeError("KITE_API_SECRET is not configured.")
-        data = self._client.generate_session(
-            request_token, api_secret=self.api_secret
-        )
+        data = self._client.generate_session(request_token, api_secret=self.api_secret)
         with self._lock:
             self._access_token = data["access_token"]
             self._client.set_access_token(self._access_token)
-        # Never return or log the access token.
         return {"user_id": data.get("user_id"), "user_name": data.get("user_name")}
 
     def get_positions(self) -> dict[str, list[dict[str, Any]]]:
-        """Return both intraday (day) and carry-forward aggregated (net) positions."""
+        """Return today's activity (day) and current carry-forward positions (net)."""
         with self._lock:
             if not self.authenticated or not self._client:
                 raise RuntimeError("Kite session is not authenticated.")
@@ -64,9 +66,84 @@ class KiteService:
             "net": [self._normalize_position(item) for item in response.get("net", [])],
         }
 
-    def get_day_positions(self) -> list[dict[str, Any]]:
-        """Backward-compatible helper for callers that only need today's positions."""
-        return self.get_positions()["day"]
+    def get_day_charges(self) -> dict[str, Any]:
+        """Calculate today's estimated charges from executed trades via Kite's virtual contract note."""
+        with self._lock:
+            if not self.authenticated or not self._client:
+                raise RuntimeError("Kite session is not authenticated.")
+            trades = self._client.trades()
+            if not trades:
+                return self._empty_charges()
+            orders = self._client.orders()
+
+            orders_by_id = {str(order.get("order_id")): order for order in orders}
+            trades_by_order: dict[str, list[dict[str, Any]]] = defaultdict(list)
+            for trade in trades:
+                trades_by_order[str(trade.get("order_id"))].append(trade)
+
+            charge_requests = []
+            for order_id, fills in trades_by_order.items():
+                order = orders_by_id.get(order_id)
+                if not order:
+                    continue
+                quantity = sum(int(fill.get("quantity") or 0) for fill in fills)
+                turnover = sum(
+                    self._number(fill.get("quantity")) * self._number(fill.get("average_price"))
+                    for fill in fills
+                )
+                if quantity <= 0 or not order.get("exchange") or not order.get("tradingsymbol"):
+                    continue
+                charge_requests.append({
+                    "order_id": order_id,
+                    "exchange": order["exchange"],
+                    "tradingsymbol": order["tradingsymbol"],
+                    "transaction_type": order.get("transaction_type"),
+                    "variety": order.get("variety", "regular"),
+                    "product": order.get("product"),
+                    "order_type": order.get("order_type"),
+                    "quantity": quantity,
+                    "average_price": round(turnover / quantity, 4),
+                })
+
+            if not charge_requests:
+                return self._empty_charges()
+            charge_rows = self._client.get_virtual_contract_note(charge_requests)
+
+        totals = {
+            "brokerage": 0.0,
+            "transaction_tax": 0.0,
+            "exchange_turnover_charge": 0.0,
+            "sebi_turnover_charge": 0.0,
+            "stamp_duty": 0.0,
+            "gst": 0.0,
+            "total": 0.0,
+        }
+        for row in charge_rows:
+            charges = row.get("charges") or {}
+            for key in ("brokerage", "transaction_tax", "exchange_turnover_charge",
+                        "sebi_turnover_charge", "stamp_duty", "total"):
+                totals[key] += self._number(charges.get(key))
+            totals["gst"] += self._number((charges.get("gst") or {}).get("total"))
+
+        totals = {key: round(value, 2) for key, value in totals.items()}
+        return {
+            "available": True,
+            "estimated": True,
+            "trade_count": len(trades),
+            "order_count": len(charge_requests),
+            "breakdown": totals,
+            "total": totals["total"],
+        }
+
+    @staticmethod
+    def _empty_charges() -> dict[str, Any]:
+        breakdown = {
+            "brokerage": 0.0, "transaction_tax": 0.0,
+            "exchange_turnover_charge": 0.0, "sebi_turnover_charge": 0.0,
+            "stamp_duty": 0.0, "gst": 0.0, "total": 0.0,
+        }
+        return {"available": True, "estimated": True, "trade_count": 0,
+                "order_count": 0, "breakdown": breakdown, "total": 0.0}
 
     @staticmethod
     def _number(value: Any) -> float:

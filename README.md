@@ -44,3 +44,11 @@ KiteTicker streams ticks only while the market/data feed is available and the ac
 - `GET /api/health` — service and ticker health
 
 The dashboard defaults to Kite's `net` collection and provides a separate `day` collection tab. The Kite access token is held in process memory and must be renewed after a server restart. Never commit `.env` or credentials.
+
+
+## Daily realised P&L and charges
+
+- The dashboard's **Realised P&L Today** is summed from Kite's `day` positions collection. The `net` collection remains the source for the net portfolio P&L and open net exposure.
+- **Charges Today** are estimated from today's executed trades: the service groups fills by order, then calls Kite's `/charges/orders` virtual contract-note API to calculate brokerage, STT/CTT, exchange charges, SEBI charges, stamp duty and GST.
+- These are estimates from Kite's virtual contract note, not the final contract-note/ledger debit. Final broker-posted charges can differ.
+- If the charges endpoint is unavailable, position monitoring remains available and the UI reports charges as unavailable rather than showing a misleading zero.

@@ -7,14 +7,9 @@ from app.kite_service import KiteService
 class KiteServiceTests(unittest.TestCase):
     def test_normalize_position_converts_numeric_values(self):
         position = KiteService._normalize_position({
-            "tradingsymbol": "NIFTY26NOV25000CE",
-            "exchange": "NFO",
-            "quantity": -50,
-            "average_price": "120.5",
-            "last_price": "135",
-            "realised": "0",
-            "unrealised": "725",
-            "pnl": "725",
+            "tradingsymbol": "NIFTY26NOV25000CE", "exchange": "NFO",
+            "quantity": -50, "average_price": "120.5", "last_price": "135",
+            "realised": "0", "unrealised": "725", "pnl": "725",
         })
         self.assertEqual(position["tradingsymbol"], "NIFTY26NOV25000CE")
         self.assertEqual(position["quantity"], -50)
@@ -43,12 +38,50 @@ class KiteServiceTests(unittest.TestCase):
             "day": [{"tradingsymbol": "TODAY", "quantity": 1, "pnl": 10}],
             "net": [{"tradingsymbol": "CARRY", "quantity": 2, "pnl": 20}],
         }
-
         positions = service.get_positions()
-
         self.assertEqual([p["tradingsymbol"] for p in positions["day"]], ["TODAY"])
         self.assertEqual([p["tradingsymbol"] for p in positions["net"]], ["CARRY"])
         service._client.positions.assert_called_once_with()
+
+    def test_daily_charges_aggregate_fills_by_order_and_sum_breakdown(self):
+        service = KiteService()
+        service._access_token = "test-token"
+        service._client = Mock()
+        service._client.trades.return_value = [
+            {"order_id": "o1", "quantity": 2, "average_price": 100},
+            {"order_id": "o1", "quantity": 3, "average_price": 110},
+        ]
+        service._client.orders.return_value = [{
+            "order_id": "o1", "exchange": "NFO", "tradingsymbol": "NIFTY26NOV25000CE",
+            "transaction_type": "BUY", "variety": "regular", "product": "MIS",
+            "order_type": "LIMIT",
+        }]
+        service._client.get_virtual_contract_note.return_value = [{
+            "charges": {
+                "brokerage": 20, "transaction_tax": 1.5,
+                "exchange_turnover_charge": 0.5, "sebi_turnover_charge": 0.01,
+                "stamp_duty": 0.2, "gst": {"total": 3.6}, "total": 25.81,
+            }
+        }]
+
+        result = service.get_day_charges()
+
+        self.assertEqual(result["trade_count"], 2)
+        self.assertEqual(result["order_count"], 1)
+        self.assertEqual(result["total"], 25.81)
+        request = service._client.get_virtual_contract_note.call_args.args[0]
+        self.assertEqual(request[0]["quantity"], 5)
+        self.assertEqual(request[0]["average_price"], 106.0)
+
+    def test_daily_charges_returns_zero_when_no_trades(self):
+        service = KiteService()
+        service._access_token = "test-token"
+        service._client = Mock()
+        service._client.trades.return_value = []
+        result = service.get_day_charges()
+        self.assertEqual(result["total"], 0.0)
+        self.assertEqual(result["trade_count"], 0)
+        service._client.orders.assert_not_called()
 
 
 if __name__ == "__main__":

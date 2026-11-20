@@ -53,7 +53,8 @@ function initializePositionsPage() {
 
   function renderSummary(data) {
     const summary = data.net_summary;
-    [["totalPnl", summary.pnl], ["realised", summary.realised], ["unrealised", summary.unrealised]]
+    const today = data.day_summary || { realised: 0 };
+    [["totalPnl", summary.pnl], ["realised", today.realised], ["unrealised", summary.unrealised]]
       .forEach(([id, value]) => {
         const node = $(id);
         node.textContent = money(value);
@@ -63,6 +64,21 @@ function initializePositionsPage() {
     $("netCount").textContent = summary.position_count + " net position rows";
     $("netTabCount").textContent = data.net.length;
     $("dayTabCount").textContent = data.day.length;
+
+    const charges = data.day_charges || {};
+    const chargeValue = charges.available ? money(charges.total) : "Unavailable";
+    $("chargesTotal").textContent = chargeValue;
+    $("chargesHint").textContent = charges.available
+      ? (charges.estimated ? "Estimated · " + (charges.order_count || 0) + " executed orders" : "Today's charges")
+      : "Kite charges endpoint unavailable";
+    $("chargesTradeCount").textContent = charges.available
+      ? (charges.trade_count || 0) + " executed trades"
+      : "Not available";
+    const breakdown = charges.breakdown || {};
+    [["chargeBrokerage", breakdown.brokerage], ["chargeTax", breakdown.transaction_tax],
+      ["chargeExchange", breakdown.exchange_turnover_charge], ["chargeSebi", breakdown.sebi_turnover_charge],
+      ["chargeStamp", breakdown.stamp_duty], ["chargeGst", breakdown.gst]]
+      .forEach(([id, value]) => { $(id).textContent = charges.available ? money(value) : "—"; });
   }
 
   function renderTable() {

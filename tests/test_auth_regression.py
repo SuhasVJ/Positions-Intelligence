@@ -11,9 +11,11 @@ from app import main
 class AuthenticationRegressionTests(unittest.IsolatedAsyncioTestCase):
     async def test_root_oauth_success_exchanges_token_and_redirects_to_dashboard(self):
         with patch.object(main.kite, "create_session") as create_session:
-            response = await main.login_page(
-                request_token="regression-token", status="success", action="login"
-            )
+            with patch.object(main, "make_snapshot", return_value={"day": [], "net": []}):
+                with patch.object(main, "start_ticker"):
+                    response = await main.login_page(
+                        request_token="regression-token", status="success", action="login"
+                    )
         create_session.assert_called_once_with("regression-token")
         self.assertIsInstance(response, RedirectResponse)
         self.assertEqual(response.status_code, 303)
@@ -47,9 +49,11 @@ class AuthenticationRegressionTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_auth_callback_alias_uses_same_oauth_flow(self):
         with patch.object(main.kite, "create_session") as create_session:
-            response = await main.auth_callback(
-                request_token="callback-token", status="success"
-            )
+            with patch.object(main, "make_snapshot", return_value={"day": [], "net": []}):
+                with patch.object(main, "start_ticker"):
+                    response = await main.auth_callback(
+                        request_token="callback-token", status="success"
+                    )
         create_session.assert_called_once_with("callback-token")
         self.assertEqual(response.headers["location"], "/api/positions/intelligence")
 

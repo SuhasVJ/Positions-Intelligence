@@ -5,6 +5,8 @@ from typing import Any
 
 from kiteconnect import KiteConnect
 
+from app.portfolio_intelligence.classifier.position_classifier import classify_position
+
 
 class KiteService:
     """Small read-only wrapper around the Kite Connect positions and charges APIs."""
@@ -15,6 +17,7 @@ class KiteService:
         self._access_token = os.getenv("KITE_ACCESS_TOKEN", "").strip()
         self._client: KiteConnect | None = None
         self._lock = RLock()
+        self._instrument_metadata: dict[tuple[str, str], dict[str, Any]] | None = None
         self._configure_client()
 
     def _configure_client(self) -> None:
@@ -67,6 +70,42 @@ class KiteService:
         }
 
 
+
+    def _load_instrument_metadata(self) -> dict[tuple[str, str], dict[str, Any]]:
+        """Load and cache Kite's instrument master for deterministic classification."""
+        with self._lock:
+            if self._instrument_metadata is not None:
+                return self._instrument_metadata
+            if not self.authenticated or not self._client:
+                raise RuntimeError("Kite session is not authenticated.")
+            instruments = self._client.instruments()
+            self._instrument_metadata = {
+                (str(item.get("exchange") or "").upper(),
+                 str(item.get("tradingsymbol") or "").upper()): item
+                for item in instruments
+                if item.get("exchange") and item.get("tradingsymbol")
+            }
+            return self._instrument_metadata
+
+    def classify_positions(self, positions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Enrich normalized positions with asset class and direction metadata."""
+        if not positions:
+            return []
+        metadata = self._load_instrument_metadata()
+        enriched = []
+        for position in positions:
+            key = (
+                str(position.get("exchange") or "").upper(),
+                str(position.get("tradingsymbol") or "").upper(),
+            )
+            instrument = metadata.get(key)
+            enriched.append({**position, **classify_position(position, instrument)})
+        return enriched
+
+    def invalidate_instrument_metadata(self) -> None:
+        """Allow an explicit refresh after instrument-master rollover."""
+        with self._lock:
+            self._instrument_metadata = None
 
     def get_funds(self) -> dict[str, Any]:
         """Return Kite available funds and utilised margins for equity and commodity."""

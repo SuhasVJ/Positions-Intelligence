@@ -31,7 +31,9 @@ def classify_position(position: dict[str, Any],
     if instrument_type == "EQ" and exchange in {"NSE", "BSE"}:
         asset_type = "EQUITY"
     elif option_type:
-        if exchange == "MCX" or segment.startswith("MCX"):
+        if exchange == "CDS":
+            asset_type = "CURRENCY_OPTION"
+        elif exchange == "MCX" or segment.startswith("MCX"):
             asset_type = "COMMODITY_OPTION"
         elif underlying in INDEX_UNDERLYINGS:
             asset_type = "INDEX_OPTION"
@@ -40,7 +42,9 @@ def classify_position(position: dict[str, Any],
         else:
             asset_type = "UNKNOWN"
     elif instrument_type == "FUT":
-        if exchange == "MCX" or segment.startswith("MCX"):
+        if exchange == "CDS":
+            asset_type = "CURRENCY_FUTURE"
+        elif exchange == "MCX" or segment.startswith("MCX"):
             asset_type = "COMMODITY_FUTURE"
         elif underlying in INDEX_UNDERLYINGS:
             asset_type = "INDEX_FUTURE"

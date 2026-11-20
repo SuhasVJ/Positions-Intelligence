@@ -3,17 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f6fa">
   <title>Positions Intelligence · Login</title>
-  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/styles.css?v=2">
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif}
+    body.login-page{min-height:100vh;display:grid;place-items:center;padding:24px;background:#f4f6fa;color:#182235}
+    .login-card{width:min(100%,400px);padding:40px 34px;text-align:center;background:#fff;border:1px solid #e5eaf2;border-radius:18px;box-shadow:0 18px 55px rgba(23,32,51,.10)}
+    .mark{width:52px;height:52px;margin:0 auto 20px;display:grid;place-items:center;border-radius:15px;background:#e9efff;color:#315eea;font-weight:800;font-size:18px}
+    h1{margin:0;font-size:27px;letter-spacing:-.8px}
+    .subtitle{margin:12px 0 26px;color:#788398;font-size:14px;line-height:1.55}
+    #loginButton{width:100%;border:0;border-radius:10px;background:#315eea;color:#fff;padding:14px 20px;font-size:15px;font-weight:650;cursor:pointer}
+    #loginButton:hover{background:#244bd0}
+    #loginButton:disabled{opacity:.65;cursor:wait}
+    .error{color:#c53045;font-size:13px;line-height:1.45;margin:14px 0 0;min-height:18px}
+  </style>
 </head>
 <body class="login-page">
   <main class="login-card">
-    <div class="mark">PI</div>
+    <div class="mark" aria-hidden="true">PI</div>
     <h1>Positions Intelligence</h1>
-    <p>Sign in securely with your Zerodha Kite account.</p>
-    <button id="loginButton">Login with Kite</button>
-    <p class="error" id="error" role="alert"></p>
+    <p class="subtitle">Sign in securely with your Zerodha Kite account.</p>
+    <button id="loginButton" type="button">Login with Kite</button>
+    <p class="error" id="error" role="alert" aria-live="polite"></p>
   </main>
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=2"></script>
 </body>
 </html>

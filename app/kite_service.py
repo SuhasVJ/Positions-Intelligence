@@ -67,6 +67,49 @@ class KiteService:
         }
 
 
+
+    def get_funds(self) -> dict[str, Any]:
+        """Return Kite available funds and utilised margins for equity and commodity."""
+        with self._lock:
+            if not self.authenticated or not self._client:
+                raise RuntimeError("Kite session is not authenticated.")
+            margins = self._client.margins()
+
+        result: dict[str, Any] = {"available": True, "segments": {}}
+        totals = {
+            "cash": 0.0, "opening_balance": 0.0, "live_balance": 0.0,
+            "collateral": 0.0, "intraday_payin": 0.0, "adhoc_margin": 0.0,
+            "net": 0.0, "utilised": 0.0, "m2m_realised": 0.0,
+            "m2m_unrealised": 0.0, "span": 0.0, "exposure": 0.0,
+        }
+        for segment in ("equity", "commodity"):
+            data = margins.get(segment) or {}
+            available = data.get("available") or {}
+            utilised = data.get("utilised") or {}
+            values = {
+                "cash": self._number(available.get("cash")),
+                "opening_balance": self._number(available.get("opening_balance")),
+                "live_balance": self._number(available.get("live_balance")),
+                "collateral": self._number(available.get("collateral")),
+                "intraday_payin": self._number(available.get("intraday_payin")),
+                "adhoc_margin": self._number(available.get("adhoc_margin")),
+                "net": self._number(data.get("net")),
+                "utilised": self._number(utilised.get("debits")),
+                "m2m_realised": self._number(utilised.get("m2m_realised")),
+                "m2m_unrealised": self._number(utilised.get("m2m_unrealised")),
+                "span": self._number(utilised.get("span")),
+                "exposure": self._number(utilised.get("exposure")),
+            }
+            result["segments"][segment] = {
+                "enabled": bool(data.get("enabled", False)),
+                **{key: round(value, 2) for key, value in values.items()},
+            }
+            for key, value in values.items():
+                totals[key] += value
+
+        result["total"] = {key: round(value, 2) for key, value in totals.items()}
+        return result
+
     def get_day_margins_pnl(self) -> dict[str, Any]:
         """Read Kite's account-level booked/unbooked intraday P&L from margins."""
         with self._lock:

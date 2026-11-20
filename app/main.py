@@ -24,6 +24,7 @@ clients: set[WebSocket] = set()
 snapshot_lock = threading.RLock()
 latest_snapshot: dict[str, Any] | None = None
 ticker: KiteTicker | None = None
+subscribed_tokens: set[int] = set()
 event_loop: asyncio.AbstractEventLoop | None = None
 
 
@@ -104,24 +105,31 @@ def on_ticker_ticks(_: KiteTicker, ticks: list[dict[str, Any]]) -> None:
         asyncio.run_coroutine_threadsafe(broadcast_snapshot(), event_loop)
 
 
+def sync_ticker_subscriptions(ws: KiteTicker) -> None:
+    data = read_snapshot()
+    if not data:
+        return
+    tokens = {int(p["instrument_token"]) for group in ("day", "net")
+              for p in data.get(group, []) if p.get("instrument_token")}
+    new_tokens = sorted(tokens - subscribed_tokens)
+    if new_tokens:
+        ws.subscribe(new_tokens)
+        ws.set_mode(ws.MODE_LTP, new_tokens)
+        subscribed_tokens.update(new_tokens)
+
+
 def start_ticker() -> None:
-    global ticker
+    global ticker, subscribed_tokens
     if not kite.authenticated or not kite.ticker_credentials:
         return
     stop_ticker()
+    subscribed_tokens = set()
     api_key, access_token = kite.ticker_credentials
     stream = KiteTicker(api_key, access_token, reconnect=True, reconnect_max_tries=50, reconnect_max_delay=60)
 
     def connected(ws: KiteTicker, _: Any) -> None:
-        data = read_snapshot()
-        if not data:
-            return
-        tokens = sorted({int(p["instrument_token"]) for group in ("day", "net")
-                         for p in data.get(group, [])
-                         if p.get("instrument_token")})
-        if tokens:
-            ws.subscribe(tokens)
-            ws.set_mode(ws.MODE_LTP, tokens)
+        subscribed_tokens.clear()
+        sync_ticker_subscriptions(ws)
 
     stream.on_connect = connected
     stream.on_ticks = on_ticker_ticks
@@ -132,11 +140,12 @@ def start_ticker() -> None:
 
 
 def stop_ticker() -> None:
-    global ticker
+    global ticker, subscribed_tokens
     if ticker:
         with suppress(Exception):
             ticker.close()
         ticker = None
+    subscribed_tokens.clear()
 
 
 async def publish_positions() -> None:
@@ -145,6 +154,8 @@ async def publish_positions() -> None:
             try:
                 data = await run_in_threadpool(make_snapshot)
                 store_snapshot(data)
+                if ticker:
+                    sync_ticker_subscriptions(ticker)
                 await broadcast_snapshot()
             except Exception as exc:
                 for client in list(clients):

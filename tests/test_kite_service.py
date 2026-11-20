@@ -37,6 +37,44 @@ class KiteServiceTests(unittest.TestCase):
         self.assertEqual(summary["unrealised"], 10.0)
         self.assertEqual(summary["pnl"], 90.0)
 
+    def test_classify_positions_uses_cached_kite_instrument_master(self):
+        service = KiteService()
+        service._access_token = "test-token"
+        service._client = Mock()
+        service._client.instruments.return_value = [
+            {"exchange": "NFO", "tradingsymbol": "NIFTY26NOV25750CE",
+             "instrument_type": "CE", "name": "NIFTY", "expiry": "2026-11-26",
+             "strike": 25750, "lot_size": 50},
+            {"exchange": "MCX", "tradingsymbol": "GOLDM26NOVFUT",
+             "instrument_type": "FUT", "name": "GOLDM", "segment": "MCX-FUT"},
+        ]
+        positions = [
+            {"exchange": "NFO", "tradingsymbol": "NIFTY26NOV25750CE", "quantity": 50},
+            {"exchange": "MCX", "tradingsymbol": "GOLDM26NOVFUT", "quantity": -1},
+        ]
+
+        first = service.classify_positions(positions)
+        second = service.classify_positions(positions)
+
+        self.assertEqual(first[0]["asset_type"], "INDEX_OPTION")
+        self.assertEqual(first[0]["option_type"], "CE")
+        self.assertEqual(first[0]["direction"], "LONG")
+        self.assertEqual(first[1]["asset_type"], "COMMODITY_FUTURE")
+        self.assertEqual(first[1]["direction"], "SHORT")
+        self.assertEqual(second[0]["classification_status"], "CLASSIFIED")
+        service._client.instruments.assert_called_once_with()
+
+    def test_classify_positions_returns_unknown_when_instrument_missing(self):
+        service = KiteService()
+        service._access_token = "test-token"
+        service._client = Mock()
+        service._client.instruments.return_value = []
+        result = service.classify_positions([
+            {"exchange": "NFO", "tradingsymbol": "UNLISTED", "quantity": 1},
+        ])
+        self.assertEqual(result[0]["asset_type"], "UNKNOWN")
+        self.assertEqual(result[0]["classification_status"], "UNKNOWN")
+
     def test_get_positions_returns_day_and_net_collections(self):
         service = KiteService()
         service._access_token = "test-token"

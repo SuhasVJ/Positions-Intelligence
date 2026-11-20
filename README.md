@@ -52,3 +52,12 @@ The dashboard defaults to Kite's `net` collection and provides a separate `day` 
 - **Charges Today** are estimated from today's executed trades: the service groups fills by order, then calls Kite's `/charges/orders` virtual contract-note API to calculate brokerage, STT/CTT, exchange charges, SEBI charges, stamp duty and GST.
 - These are estimates from Kite's virtual contract note, not the final contract-note/ledger debit. Final broker-posted charges can differ.
 - If the charges endpoint is unavailable, position monitoring remains available and the UI reports charges as unavailable rather than showing a misleading zero.
+
+
+## Funds and margins
+
+- `GET /api/funds` returns the authenticated Kite account's equity and commodity funds/margin details.
+- The response includes available cash, opening balance, live balance, collateral, intraday pay-in, net available margin, utilised debits, realised/unrealised M2M, SPAN and exposure.
+- The positions dashboard displays equity and commodity balances separately. These segment balances are not combined into one spendable cash figure.
+- Funds are included in the `/api/positions/all` REST snapshot and `/ws/positions` WebSocket payload. They refresh on the configured account snapshot interval (`POSITION_REFRESH_SECONDS`, default 30 seconds), not on every market tick.
+- Data source: Kite Connect `GET /user/margins`. This is a read-only account margin snapshot, not a bank ledger or withdrawal balance.

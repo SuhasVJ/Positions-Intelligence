@@ -62,3 +62,14 @@ body.theme-light .funds-segment h3{color:#6845b5}
 body.theme-light .funds-values span{color:#66758f}
 body.theme-light .funds-values strong{color:#202d43}
 @media(max-width:800px){.funds-grid{grid-template-columns:1fr}.funds-values{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Simplified P&L table heading and selected-view total */
+.pnl-table-title h2{margin:0;font-size:20px;letter-spacing:-.025em}
+.pnl-table-title .muted{margin:5px 0 0}
+.table-pnl-total{display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding:8px 13px;border:1px solid #3a365f;border-radius:10px;background:#211d3b}
+.table-pnl-total span{color:#a99bcf;font-size:10px}
+.table-pnl-total strong{font-size:19px;font-variant-numeric:tabular-nums;color:#f3f6ff}
+body.theme-light .table-pnl-total{background:#f0ebff;border-color:#d3c5f5}
+body.theme-light .table-pnl-total span{color:#71618f}
+body.theme-light .table-pnl-total strong{color:#25334b}
+@media(max-width:600px){.table-pnl-total{width:100%;align-items:flex-start}.pnl-table-title{width:100%}}

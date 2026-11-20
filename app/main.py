@@ -22,11 +22,16 @@ clients: set[WebSocket] = set()
 
 
 def make_snapshot() -> dict[str, Any]:
-    positions = kite.get_day_positions()
+    positions = kite.get_positions()
     return {
         "as_of": datetime.now(IST).isoformat(),
-        "positions": positions,
-        "summary": kite.summarize(positions),
+        "day": positions["day"],
+        "net": positions["net"],
+        "day_summary": kite.summarize(positions["day"]),
+        "net_summary": kite.summarize(positions["net"]),
+        # Keep these aliases temporarily for clients using the original M1 response.
+        "positions": positions["day"],
+        "summary": kite.summarize(positions["day"]),
     }
 
 
@@ -61,7 +66,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title="Positions Intelligence API",
-    description="Read-only today's positions from Zerodha Kite Connect.",
+    description="Read-only intraday and net positions from Zerodha Kite Connect.",
     version="0.2.0",
     lifespan=lifespan,
 )
@@ -139,6 +144,7 @@ async def positions_intelligence():
     return FileResponse("app/static/positions.html")
 
 
+@app.get("/api/positions/all")
 @app.get("/api/positions/today")
 async def today_positions():
     if not kite.authenticated:

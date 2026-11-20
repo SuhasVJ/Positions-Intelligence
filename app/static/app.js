@@ -103,6 +103,19 @@ function initializePositionsPage() {
     const tableTotal = $("tableTotalPnl");
     tableTotal.textContent = money(selectedPnl);
     setPnlClass(tableTotal, selectedPnl);
+
+    // Scale the visual fill to ₹10,000; cap at 100% while colour communicates direction.
+    const pnlFill = $("pnlIndicatorFill");
+    const pnlMagnitude = Math.min(Math.abs(selectedPnl) / 10000, 1) * 100;
+    pnlFill.style.width = pnlMagnitude + "%";
+    pnlFill.classList.toggle("positive", selectedPnl > 0);
+    pnlFill.classList.toggle("negative", selectedPnl < 0);
+    pnlFill.classList.toggle("neutral", selectedPnl === 0);
+    pnlFill.parentElement.parentElement.setAttribute(
+      "aria-label",
+      selectedPnl > 0 ? "Profit " + money(selectedPnl) :
+        selectedPnl < 0 ? "Loss " + money(Math.abs(selectedPnl)) : "Break-even"
+    );
     $("netTab").classList.toggle("active", activeView === "net");
     $("dayTab").classList.toggle("active", activeView === "day");
     $("netTab").setAttribute("aria-selected", String(activeView === "net"));

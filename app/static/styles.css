@@ -73,3 +73,15 @@ body.theme-light .table-pnl-total{background:#f0ebff;border-color:#d3c5f5}
 body.theme-light .table-pnl-total span{color:#71618f}
 body.theme-light .table-pnl-total strong{color:#25334b}
 @media(max-width:600px){.table-pnl-total{width:100%;align-items:flex-start}.pnl-table-title{width:100%}}
+
+
+/* Animated selected-view P&L magnitude indicator */
+.pnl-indicator{flex:1 1 180px;min-width:110px;display:flex;align-items:center;padding:0 2px}
+.pnl-indicator-track{position:relative;width:100%;height:9px;overflow:hidden;border-radius:999px;background:#27334b;box-shadow:inset 0 1px 3px #0005}
+.pnl-indicator-fill{height:100%;width:0;border-radius:inherit;background:#64748b;transition:width .65s cubic-bezier(.22,.8,.25,1),background-color .35s ease,box-shadow .35s ease}
+.pnl-indicator-fill.negative{background:linear-gradient(90deg,#ef4444,#fb7185);box-shadow:0 0 12px #ef444455}
+.pnl-indicator-fill.positive{background:linear-gradient(90deg,#059669,#34d399);box-shadow:0 0 12px #34d39955}
+.pnl-indicator-fill.neutral{background:#94a3b8;box-shadow:none}
+body.theme-light .pnl-indicator-track{background:#dce3ef;box-shadow:inset 0 1px 3px #263b5b20}
+@media(max-width:900px){.pnl-indicator{width:100%;flex:1 1 100%;order:3}}
+@media(prefers-reduced-motion:reduce){.pnl-indicator-fill{transition:none}}

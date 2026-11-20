@@ -30,15 +30,25 @@ event_loop: asyncio.AbstractEventLoop | None = None
 
 def make_snapshot() -> dict[str, Any]:
     positions = kite.get_positions()
+    day_summary = kite.summarize(positions["day"])
+    net_summary = kite.summarize(positions["net"])
+    try:
+        charges = kite.get_day_charges()
+    except Exception as exc:
+        # Keep position monitoring available if the optional charges endpoint fails.
+        charges = {"available": False, "estimated": True, "trade_count": 0,
+                   "order_count": 0, "total": None, "breakdown": {},
+                   "error": str(exc)}
     return {
         "as_of": datetime.now(IST).isoformat(),
         "price_feed": "KiteTicker" if ticker else "REST snapshot",
         "day": positions["day"],
         "net": positions["net"],
-        "day_summary": kite.summarize(positions["day"]),
-        "net_summary": kite.summarize(positions["net"]),
+        "day_summary": day_summary,
+        "net_summary": net_summary,
+        "day_charges": charges,
         "positions": positions["day"],
-        "summary": kite.summarize(positions["day"]),
+        "summary": day_summary,
     }
 
 

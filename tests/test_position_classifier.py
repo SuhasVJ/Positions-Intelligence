@@ -47,6 +47,14 @@ class PositionClassifierTests(unittest.TestCase):
         self.assertEqual(future["asset_type"], "COMMODITY_FUTURE")
         self.assertEqual(option["asset_type"], "COMMODITY_OPTION")
 
+    def test_classifies_currency_option(self):
+        result = self.classify("CDS", "CE", "USDINR")
+        self.assertEqual(result["asset_type"], "CURRENCY_OPTION")
+
+    def test_classifies_currency_future(self):
+        result = self.classify("CDS", "FUT", "USDINR")
+        self.assertEqual(result["asset_type"], "CURRENCY_FUTURE")
+
     def test_zero_quantity_is_flat(self):
         result = self.classify("NSE", "EQ", "INFY", quantity=0)
         self.assertEqual(result["direction"], "FLAT")

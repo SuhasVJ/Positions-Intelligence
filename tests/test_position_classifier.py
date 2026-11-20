@@ -1,4 +1,5 @@
 import unittest
+from datetime import date
 
 from app.portfolio_intelligence.classifier.position_classifier import classify_position
 
@@ -21,10 +22,11 @@ class PositionClassifierTests(unittest.TestCase):
 
     def test_classifies_index_option_and_preserves_option_metadata(self):
         result = self.classify("NFO", "CE", "NIFTY", -50,
-                               expiry="2026-11-26", strike=25750, lot_size=50)
+                               expiry=date(2026, 11, 26), strike=25750, lot_size=50)
         self.assertEqual(result["asset_type"], "INDEX_OPTION")
         self.assertEqual(result["direction"], "SHORT")
         self.assertEqual(result["option_type"], "CE")
+        self.assertEqual(result["expiry"], "2026-11-26")
         self.assertEqual(result["strike"], 25750.0)
         self.assertEqual(result["lot_size"], 50)
 

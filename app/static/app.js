@@ -109,10 +109,8 @@ function initializePositionsPage() {
 
   function render(data) {
     snapshot = data;
-    $("asOf").textContent = "Last updated: " + new Date(data.as_of).toLocaleString("en-IN");
-    const feed = data.price_feed === "KiteTicker" ? "Live prices · KiteTicker" : "WebSocket connected · REST snapshot";
-    $("connection").innerHTML = "<i></i> " + feed;
-    $("connection").classList.add("connected");
+    const feed = data.price_feed === "KiteTicker" ? "Live prices · KiteTicker" : "REST snapshot · waiting for market ticks";
+    $("feedStatus").textContent = feed;
     renderSummary(data);
     renderTable();
     showError("");
@@ -134,8 +132,7 @@ function initializePositionsPage() {
     const scheme = window.location.protocol === "https:" ? "wss" : "ws";
     socket = new WebSocket(`${scheme}://${window.location.host}/ws/positions`);
     socket.onopen = () => {
-      $("connection").innerHTML = "<i></i> Live";
-      $("connection").classList.add("connected");
+      $("feedStatus").textContent = "WebSocket connected · waiting for position updates";
     };
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
@@ -143,8 +140,7 @@ function initializePositionsPage() {
       else if (message.type === "error") showError(message.message);
     };
     socket.onclose = () => {
-      $("connection").innerHTML = "<i></i> Reconnecting";
-      $("connection").classList.remove("connected");
+      $("feedStatus").textContent = "WebSocket disconnected · reconnecting";
       window.setTimeout(connectSocket, 3000);
     };
     socket.onerror = () => socket.close();
@@ -152,7 +148,6 @@ function initializePositionsPage() {
 
   $("netTab").addEventListener("click", () => { activeView = "net"; renderTable(); });
   $("dayTab").addEventListener("click", () => { activeView = "day"; renderTable(); });
-  $("refreshButton").addEventListener("click", refresh);
   $("logoutButton").addEventListener("click", () => { window.location.href = "/logout"; });
 
   refresh();

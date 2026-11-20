@@ -43,6 +43,36 @@ class KiteServiceTests(unittest.TestCase):
         self.assertEqual([p["tradingsymbol"] for p in positions["net"]], ["CARRY"])
         service._client.positions.assert_called_once_with()
 
+
+    def test_day_margins_pnl_uses_booked_m2m_from_both_segments(self):
+        service = KiteService()
+        service._access_token = "test-token"
+        service._client = Mock()
+        service._client.margins.return_value = {
+            "equity": {"utilised": {"m2m_realised": 1250.5, "m2m_unrealised": -100.0}},
+            "commodity": {"utilised": {"m2m_realised": -250.0, "m2m_unrealised": 50.0}},
+        }
+
+        result = service.get_day_margins_pnl()
+
+        self.assertEqual(result["realised"], 1000.5)
+        self.assertEqual(result["unrealised"], -50.0)
+        self.assertEqual(result["source"], "kite_margins")
+        service._client.margins.assert_called_once_with()
+
+    def test_day_margins_pnl_handles_missing_segments(self):
+        service = KiteService()
+        service._access_token = "test-token"
+        service._client = Mock()
+        service._client.margins.return_value = {
+            "equity": {"utilised": {"m2m_realised": 75.25}},
+        }
+
+        result = service.get_day_margins_pnl()
+
+        self.assertEqual(result["realised"], 75.25)
+        self.assertEqual(result["unrealised"], 0.0)
+
     def test_daily_charges_aggregate_fills_by_order_and_sum_breakdown(self):
         service = KiteService()
         service._access_token = "test-token"

@@ -53,13 +53,20 @@ class KiteService:
         # Never return or log the access token.
         return {"user_id": data.get("user_id"), "user_name": data.get("user_name")}
 
-    def get_day_positions(self) -> list[dict[str, Any]]:
+    def get_positions(self) -> dict[str, list[dict[str, Any]]]:
+        """Return both intraday (day) and carry-forward aggregated (net) positions."""
         with self._lock:
             if not self.authenticated or not self._client:
                 raise RuntimeError("Kite session is not authenticated.")
             response = self._client.positions()
-        positions = response.get("day", [])
-        return [self._normalize_position(item) for item in positions]
+        return {
+            "day": [self._normalize_position(item) for item in response.get("day", [])],
+            "net": [self._normalize_position(item) for item in response.get("net", [])],
+        }
+
+    def get_day_positions(self) -> list[dict[str, Any]]:
+        """Backward-compatible helper for callers that only need today's positions."""
+        return self.get_positions()["day"]
 
     @staticmethod
     def _number(value: Any) -> float:

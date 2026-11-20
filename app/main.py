@@ -15,6 +15,7 @@ from kiteconnect import KiteTicker
 from starlette.concurrency import run_in_threadpool
 
 from app.kite_service import KiteService
+from app.pnl_progress import add_pnl_progress
 
 load_dotenv()
 IST = ZoneInfo("Asia/Kolkata")
@@ -47,6 +48,9 @@ def make_snapshot() -> dict[str, Any]:
                     "classification_confidence": 0.0,
                     "classification_source": "INSTRUMENT_MASTER_UNAVAILABLE",
                 })
+    for collection in ("day", "net"):
+        for position in positions[collection]:
+            add_pnl_progress(position)
     day_summary = kite.summarize(positions["day"])
     net_summary = kite.summarize(positions["net"])
     try:
@@ -147,6 +151,7 @@ def on_ticker_ticks(_: KiteTicker, ticks: list[dict[str, Any]]) -> None:
                 # Apply only the tick-to-tick mark-to-market change to Kite's REST baseline.
                 position["unrealised"] = round(previous_unrealised + (ltp - previous_ltp) * quantity, 2)
                 position["pnl"] = round(float(position.get("realised") or 0) + position["unrealised"], 2)
+                add_pnl_progress(position)
                 changed = True
         if changed:
             current["net_summary"] = kite.summarize(current["net"])

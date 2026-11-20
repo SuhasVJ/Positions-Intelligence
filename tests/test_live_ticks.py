@@ -34,6 +34,10 @@ class LiveTickRepricingTests(unittest.TestCase):
         self.assertEqual(position["last_price"], 102.0)
         self.assertEqual(position["unrealised"], 40.0)
         self.assertEqual(position["pnl"], 45.0)
+        self.assertEqual(position["position_value_basis"], 990.0)
+        self.assertAlmostEqual(position["pnl_multiple"], 45.0 / 990.0, places=4)
+        self.assertAlmostEqual(position["pnl_progress_percent"], (45.0 / 990.0) / 2 * 100, places=2)
+        self.assertEqual(position["pnl_progress_direction"], "PROFIT")
         self.assertEqual(main.latest_snapshot["net_summary"]["pnl"], 73.0)
 
     def test_short_position_pnl_moves_opposite_to_ltp(self):

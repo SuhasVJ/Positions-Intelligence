@@ -99,22 +99,38 @@ function initializePositionsPage() {
     if (!snapshot) return;
     const positions = snapshot[activeView] || [];
     $("rowCount").textContent = positions.length + (positions.length === 1 ? " position" : " positions");
-    const selectedPnl = positions.reduce((sum, position) => sum + Number(position.pnl || 0), 0);
+    const grossProfit = positions.reduce((sum, position) => {
+      const pnl = Number(position.pnl || 0);
+      return sum + (pnl > 0 ? pnl : 0);
+    }, 0);
+    const grossLoss = positions.reduce((sum, position) => {
+      const pnl = Number(position.pnl || 0);
+      return sum + (pnl < 0 ? Math.abs(pnl) : 0);
+    }, 0);
+    const selectedPnl = grossProfit - grossLoss;
+
+    const profitValue = $("pnlGrossProfit");
+    const lossValue = $("pnlGrossLoss");
     const pnlValue = $("pnlIndicatorValue");
+    profitValue.textContent = money(grossProfit);
+    lossValue.textContent = money(-grossLoss);
     pnlValue.textContent = money(selectedPnl);
+    setPnlClass(profitValue, grossProfit);
+    setPnlClass(lossValue, -grossLoss);
     setPnlClass(pnlValue, selectedPnl);
 
-    // Scale the visual fill to ₹10,000; cap at 100% while colour communicates direction.
-    const pnlFill = $("pnlIndicatorFill");
-    const pnlMagnitude = Math.min(Math.abs(selectedPnl) / 10000, 1) * 100;
-    pnlFill.style.width = pnlMagnitude + "%";
-    pnlFill.classList.toggle("positive", selectedPnl > 0);
-    pnlFill.classList.toggle("negative", selectedPnl < 0);
-    pnlFill.classList.toggle("neutral", selectedPnl === 0);
-    pnlFill.parentElement.parentElement.setAttribute(
+    // Split the bar by gross profit/loss contribution; both figures remain visible.
+    const combinedPnl = grossProfit + grossLoss;
+    const profitShare = combinedPnl > 0 ? (grossProfit / combinedPnl) * 100 : 0;
+    const lossShare = combinedPnl > 0 ? (grossLoss / combinedPnl) * 100 : 0;
+    $("pnlProfitSegment").style.width = profitShare + "%";
+    $("pnlLossSegment").style.width = lossShare + "%";
+    $("pnlProfitSegment").classList.toggle("empty", grossProfit === 0);
+    $("pnlLossSegment").classList.toggle("empty", grossLoss === 0);
+    $("pnlProfitSegment").parentElement.setAttribute(
       "aria-label",
-      selectedPnl > 0 ? "Total profit " + money(selectedPnl) :
-        selectedPnl < 0 ? "Total loss " + money(Math.abs(selectedPnl)) : "Total P&L break-even"
+      "Gross profit " + money(grossProfit) + ", gross loss " + money(-grossLoss) +
+        ", net P&L " + money(selectedPnl)
     );
     $("netTab").classList.toggle("active", activeView === "net");
     $("dayTab").classList.toggle("active", activeView === "day");

@@ -137,3 +137,12 @@ body.theme-light .pnl-split-track{background:#dce3ef;box-shadow:inset 0 1px 3px 
 .intelligence-score.score-medium{color:#fbbf24!important}
 .intelligence-score.score-low{color:#fb7185!important}
 body.theme-light .intelligence-score.score-pending{color:#7b879b!important}
+
+
+/* Open exposure is highlighted independently of its current P&L direction. */
+tbody tr.open-position-row{background:linear-gradient(90deg,#064e3b33,#064e3b0d 70%,transparent);box-shadow:inset 3px 0 0 #10b981}
+tbody tr.open-position-row:hover{background:linear-gradient(90deg,#065f463d,#065f4614 70%,#ffffff08)}
+.open-position-badge{display:inline-flex;align-items:center;vertical-align:middle;margin-left:9px;padding:3px 7px;border:1px solid #10b98166;border-radius:999px;background:#064e3b66;color:#6ee7b7;font-size:9px;font-weight:850;letter-spacing:.08em;line-height:1.2}
+body.theme-light tbody tr.open-position-row{background:linear-gradient(90deg,#d1fae5aa,#ecfdf566 70%,transparent);box-shadow:inset 3px 0 0 #059669}
+body.theme-light tbody tr.open-position-row:hover{background:linear-gradient(90deg,#bbf7d0cc,#ecfdf5 70%,#eaf0fa)}
+body.theme-light .open-position-badge{border-color:#6ee7b7;background:#d1fae5;color:#047857}

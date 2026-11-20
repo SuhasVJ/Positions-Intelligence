@@ -28,6 +28,12 @@ class KiteService:
     def authenticated(self) -> bool:
         return bool(self._client and self._access_token)
 
+    def clear_session(self) -> None:
+        with self._lock:
+            self._access_token = ""
+            if self._client:
+                self._client.set_access_token("")
+
     def login_url(self) -> str:
         if not self._client:
             raise RuntimeError("KITE_API_KEY is not configured.")

@@ -8,9 +8,8 @@ from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
 from app.kite_service import KiteService
@@ -20,10 +19,6 @@ IST = ZoneInfo("Asia/Kolkata")
 kite = KiteService()
 refresh_seconds = max(2, int(os.getenv("POSITION_REFRESH_SECONDS", "5")))
 clients: set[WebSocket] = set()
-
-
-class SessionRequest(BaseModel):
-    request_token: str
 
 
 def make_snapshot() -> dict[str, Any]:
@@ -49,10 +44,9 @@ async def publish_positions() -> None:
                 for client in stale_clients:
                     clients.discard(client)
             except Exception as exc:
-                message = {"type": "error", "message": str(exc)}
                 for client in list(clients):
                     with suppress(Exception):
-                        await client.send_json(message)
+                        await client.send_json({"type": "error", "message": str(exc)})
         await asyncio.sleep(refresh_seconds)
 
 
@@ -68,7 +62,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(
     title="Positions Intelligence API",
     description="Read-only today's positions from Zerodha Kite Connect.",
-    version="0.1.0",
+    version="0.2.0",
     lifespan=lifespan,
 )
 app.add_middleware(
@@ -82,8 +76,23 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
 @app.get("/", include_in_schema=False)
-async def home():
+async def login_page():
+    if kite.authenticated:
+        return RedirectResponse(url="/api/positions/intelligence", status_code=303)
     return FileResponse("app/static/index.html")
+
+
+@app.get("/auth/callback", include_in_schema=False)
+async def auth_callback(request_token: str | None = None, status: str | None = None):
+    if status == "cancel":
+        return RedirectResponse(url="/?login=cancelled", status_code=303)
+    if not request_token:
+        raise HTTPException(status_code=400, detail="Kite request_token is missing.")
+    try:
+        await run_in_threadpool(kite.create_session, request_token)
+    except Exception as exc:
+        raise HTTPException(status_code=401, detail=f"Kite authentication failed: {exc}") from exc
+    return RedirectResponse(url="/api/positions/intelligence", status_code=303)
 
 
 @app.get("/api/health")
@@ -104,13 +113,17 @@ async def auth_login():
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
-@app.post("/api/auth/session")
-async def auth_session(request: SessionRequest):
-    try:
-        user = await run_in_threadpool(kite.create_session, request.request_token)
-        return {"authenticated": True, "user": user}
-    except Exception as exc:
-        raise HTTPException(status_code=401, detail=str(exc)) from exc
+@app.get("/logout", include_in_schema=False)
+async def logout():
+    kite.clear_session()
+    return RedirectResponse(url="/", status_code=303)
+
+
+@app.get("/api/positions/intelligence", include_in_schema=False)
+async def positions_intelligence():
+    if not kite.authenticated:
+        return RedirectResponse(url="/", status_code=303)
+    return FileResponse("app/static/positions.html")
 
 
 @app.get("/api/positions/today")
@@ -137,10 +150,9 @@ async def positions_socket(websocket: WebSocket):
         else:
             await websocket.send_json({
                 "type": "error",
-                "message": "Kite session is not authenticated. Complete the Kite login flow first.",
+                "message": "Kite session is not authenticated. Please log in again.",
             })
         while True:
-            # Keep the connection alive; snapshots are pushed by the broadcaster.
             await websocket.receive_text()
     except WebSocketDisconnect:
         pass

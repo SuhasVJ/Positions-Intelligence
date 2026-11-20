@@ -33,9 +33,22 @@ def make_snapshot() -> dict[str, Any]:
     day_summary = kite.summarize(positions["day"])
     net_summary = kite.summarize(positions["net"])
     try:
-        day_pnl = kite.get_day_margins_pnl()
+        # One /user/margins call supplies both account funds and booked intraday M2M.
+        funds = kite.get_funds()
+        day_pnl = {
+            "realised": funds["total"]["m2m_realised"],
+            "unrealised": funds["total"]["m2m_unrealised"],
+            "source": "kite_margins",
+            "segments": {
+                name: {
+                    "realised": values["m2m_realised"],
+                    "unrealised": values["m2m_unrealised"],
+                }
+                for name, values in funds["segments"].items()
+            },
+        }
     except Exception as exc:
-        # Position-level values are a fallback if the margins endpoint is unavailable.
+        funds = {"available": False, "segments": {}, "total": {}, "error": str(exc)}
         day_pnl = {
             "realised": day_summary["realised"],
             "unrealised": day_summary["unrealised"],
@@ -59,6 +72,7 @@ def make_snapshot() -> dict[str, Any]:
         "day_pnl": day_pnl,
         "net_summary": net_summary,
         "day_charges": charges,
+        "funds": funds,
         "positions": positions["day"],
         "summary": day_summary,
     }
@@ -286,6 +300,16 @@ async def today_positions():
         return data
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Kite API error: {exc}") from exc
+
+
+@app.get("/api/funds")
+async def account_funds():
+    if not kite.authenticated:
+        raise HTTPException(status_code=401, detail="Kite session is not authenticated. Complete the Kite login flow first.")
+    try:
+        return await run_in_threadpool(kite.get_funds)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Kite funds API error: {exc}") from exc
 
 
 @app.websocket("/ws/positions")

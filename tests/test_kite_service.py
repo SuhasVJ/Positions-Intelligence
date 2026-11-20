@@ -44,6 +44,39 @@ class KiteServiceTests(unittest.TestCase):
         service._client.positions.assert_called_once_with()
 
 
+
+    def test_get_funds_returns_equity_and_commodity_balances(self):
+        service = KiteService()
+        service._access_token = "test-token"
+        service._client = Mock()
+        service._client.margins.return_value = {
+            "equity": {
+                "enabled": True, "net": 9000,
+                "available": {"cash": 10000, "opening_balance": 12000,
+                              "live_balance": 9500, "collateral": 500,
+                              "intraday_payin": 200, "adhoc_margin": 0},
+                "utilised": {"debits": 1000, "m2m_realised": 100,
+                             "m2m_unrealised": -50, "span": 700, "exposure": 300},
+            },
+            "commodity": {
+                "enabled": True, "net": 4000,
+                "available": {"cash": 4500, "opening_balance": 4500,
+                              "live_balance": 4200, "collateral": 0,
+                              "intraday_payin": 0, "adhoc_margin": 0},
+                "utilised": {"debits": 500, "m2m_realised": -25,
+                             "m2m_unrealised": 10, "span": 400, "exposure": 100},
+            },
+        }
+
+        result = service.get_funds()
+
+        self.assertTrue(result["available"])
+        self.assertEqual(result["segments"]["equity"]["cash"], 10000.0)
+        self.assertEqual(result["segments"]["commodity"]["live_balance"], 4200.0)
+        self.assertEqual(result["total"]["net"], 13000.0)
+        self.assertEqual(result["total"]["utilised"], 1500.0)
+        service._client.margins.assert_called_once_with()
+
     def test_day_margins_pnl_uses_booked_m2m_from_both_segments(self):
         service = KiteService()
         service._access_token = "test-token"

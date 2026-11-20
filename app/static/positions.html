@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Positions Intelligence</title>
-  <link rel="stylesheet" href="/static/styles.css?v=5">
+  <link rel="stylesheet" href="/static/styles.css?v=6">
 </head>
 <body>
   <main class="container">
@@ -27,6 +27,30 @@
       </div>
       <p class="charges-note">Estimated using Kite virtual contract note; final contract-note charges may differ.</p>
     </section>
+    <section class="funds-panel" aria-label="Available funds and margin utilisation">
+      <div class="funds-heading"><strong>Funds &amp; margins</strong><span>Live account balances · Equity and commodity</span></div>
+      <div class="funds-grid">
+        <article class="funds-segment">
+          <h3>Equity</h3>
+          <div class="funds-values">
+            <div><span>Available cash</span><strong id="equityCash">—</strong></div>
+            <div><span>Live balance</span><strong id="equityLive">—</strong></div>
+            <div><span>Net available</span><strong id="equityNet">—</strong></div>
+            <div><span>Utilised margin</span><strong id="equityUtilised">—</strong></div>
+          </div>
+        </article>
+        <article class="funds-segment">
+          <h3>Commodity</h3>
+          <div class="funds-values">
+            <div><span>Available cash</span><strong id="commodityCash">—</strong></div>
+            <div><span>Live balance</span><strong id="commodityLive">—</strong></div>
+            <div><span>Net available</span><strong id="commodityNet">—</strong></div>
+            <div><span>Utilised margin</span><strong id="commodityUtilised">—</strong></div>
+          </div>
+        </article>
+      </div>
+      <p class="funds-note" id="fundsNote">Balances are provided by Kite Connect and refresh with account snapshots.</p>
+    </section>
     <section class="panel">
       <div class="panel-heading">
         <div><p class="eyebrow">PORTFOLIO MONITOR</p><h2>Positions</h2><p class="muted">Switch between all carry-forward net positions and today's intraday activity.</p></div>
@@ -47,6 +71,6 @@
       </div>
     </footer>
   </main>
-  <script src="/static/app.js?v=5"></script>
+  <script src="/static/app.js?v=6"></script>
 </body>
 </html>

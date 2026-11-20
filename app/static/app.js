@@ -65,6 +65,20 @@ function initializePositionsPage() {
     $("netTabCount").textContent = data.net.length;
     $("dayTabCount").textContent = data.day.length;
 
+    const funds = data.funds || {};
+    const segments = funds.segments || {};
+    [["equity", "equityCash", "cash"], ["equity", "equityLive", "live_balance"],
+      ["equity", "equityNet", "net"], ["equity", "equityUtilised", "utilised"],
+      ["commodity", "commodityCash", "cash"], ["commodity", "commodityLive", "live_balance"],
+      ["commodity", "commodityNet", "net"], ["commodity", "commodityUtilised", "utilised"]]
+      .forEach(([segment, id, field]) => {
+        const node = $(id);
+        node.textContent = funds.available && segments[segment] ? money(segments[segment][field]) : "Unavailable";
+      });
+    $("fundsNote").textContent = funds.available
+      ? "Kite account balances · refreshed with REST snapshots and WebSocket updates"
+      : "Funds unavailable: " + (funds.error || "Kite did not return margin data");
+
     const charges = data.day_charges || {};
     const chargeValue = charges.available ? money(charges.total) : "Unavailable";
     $("chargesTotal").textContent = chargeValue;

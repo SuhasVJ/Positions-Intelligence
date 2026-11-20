@@ -128,3 +128,12 @@ body.theme-light .pnl-split-track{background:#dce3ef;box-shadow:inset 0 1px 3px 
 @media(max-width:900px){.pnl-indicator{width:100%;flex:1 1 100%;order:0}}
 @media(max-width:480px){.pnl-breakdown-values{gap:6px}.pnl-stat span{font-size:9px}.pnl-stat strong{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.pnl-split-profit,.pnl-split-loss{transition:none}}
+
+
+/* Intelligence score column */
+.intelligence-score{font-weight:750;font-variant-numeric:tabular-nums}
+.intelligence-score.score-pending{color:#8391aa!important;font-size:11px;font-weight:600}
+.intelligence-score.score-high{color:#34d399!important}
+.intelligence-score.score-medium{color:#fbbf24!important}
+.intelligence-score.score-low{color:#fb7185!important}
+body.theme-light .intelligence-score.score-pending{color:#7b879b!important}

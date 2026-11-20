@@ -31,6 +31,7 @@ def make_snapshot() -> dict[str, Any]:
     positions = kite.get_positions()
     return {
         "as_of": datetime.now(IST).isoformat(),
+        "price_feed": "KiteTicker" if ticker else "REST snapshot",
         "day": positions["day"],
         "net": positions["net"],
         "day_summary": kite.summarize(positions["day"]),
@@ -85,15 +86,18 @@ def on_ticker_ticks(_: KiteTicker, ticks: list[dict[str, Any]]) -> None:
                     continue
                 ltp = tick_prices[int(token)]
                 quantity = int(position.get("quantity") or 0)
+                previous_ltp = float(position.get("last_price") or 0)
+                previous_unrealised = float(position.get("unrealised") or 0)
                 position["last_price"] = ltp
-                # Revalue the open net quantity against its broker-reported average price.
-                position["unrealised"] = round((ltp - float(position.get("average_price") or 0)) * quantity, 2)
+                # Apply only the tick-to-tick mark-to-market change to Kite's REST baseline.
+                position["unrealised"] = round(previous_unrealised + (ltp - previous_ltp) * quantity, 2)
                 position["pnl"] = round(float(position.get("realised") or 0) + position["unrealised"], 2)
                 changed = True
         if changed:
             current["net_summary"] = kite.summarize(current["net"])
             current["day_summary"] = kite.summarize(current["day"])
             current["as_of"] = datetime.now(IST).isoformat()
+            current["price_feed"] = "KiteTicker"
             current["positions"] = current["day"]
             current["summary"] = current["day_summary"]
     if changed and event_loop and event_loop.is_running():

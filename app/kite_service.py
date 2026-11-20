@@ -66,6 +66,36 @@ class KiteService:
             "net": [self._normalize_position(item) for item in response.get("net", [])],
         }
 
+
+    def get_day_margins_pnl(self) -> dict[str, Any]:
+        """Read Kite's account-level booked/unbooked intraday P&L from margins."""
+        with self._lock:
+            if not self.authenticated or not self._client:
+                raise RuntimeError("Kite session is not authenticated.")
+            margins = self._client.margins()
+
+        realised = 0.0
+        unrealised = 0.0
+        segments: dict[str, dict[str, float]] = {}
+        for segment in ("equity", "commodity"):
+            segment_data = margins.get(segment) or {}
+            utilised = segment_data.get("utilised") or {}
+            segment_realised = self._number(utilised.get("m2m_realised"))
+            segment_unrealised = self._number(utilised.get("m2m_unrealised"))
+            segments[segment] = {
+                "realised": round(segment_realised, 2),
+                "unrealised": round(segment_unrealised, 2),
+            }
+            realised += segment_realised
+            unrealised += segment_unrealised
+
+        return {
+            "realised": round(realised, 2),
+            "unrealised": round(unrealised, 2),
+            "source": "kite_margins",
+            "segments": segments,
+        }
+
     def get_day_charges(self) -> dict[str, Any]:
         """Calculate today's estimated charges from executed trades via Kite's virtual contract note."""
         with self._lock:

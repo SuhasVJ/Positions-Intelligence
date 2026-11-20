@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Positions Intelligence</title>
-  <link rel="stylesheet" href="/static/styles.css?v=4">
+  <link rel="stylesheet" href="/static/styles.css?v=5">
 </head>
 <body>
   <main class="container">
@@ -41,9 +41,12 @@
     <p class="error" id="error" role="alert"></p>
     <footer class="page-footer">
       <span class="footer-note">Positions Intelligence · Read-only monitoring</span>
-      <button class="button button-outline" id="logoutButton" type="button">Logout</button>
+      <div class="footer-actions">
+        <button class="button button-outline" id="themeToggle" type="button" aria-label="Switch to light theme">Switch to light theme</button>
+        <button class="button button-outline" id="logoutButton" type="button">Logout</button>
+      </div>
     </footer>
   </main>
-  <script src="/static/app.js?v=4"></script>
+  <script src="/static/app.js?v=5"></script>
 </body>
 </html>

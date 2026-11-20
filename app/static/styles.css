@@ -11,3 +11,34 @@
 .page-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:16px 2px 4px;padding:12px 2px 0;border-top:1px solid #27334c}
 .footer-note{color:#7888a5;font-size:11px}
 @media(max-width:600px){.page-footer{align-items:flex-start;flex-direction:column}.page-footer .button{width:100%}}
+
+.footer-actions{display:flex;align-items:center;gap:8px}
+@media(max-width:600px){.footer-actions{width:100%;flex-direction:column}.footer-actions .button{width:100%}}
+/* Optional light theme */
+body.theme-light{color:#172033;background:linear-gradient(145deg,#f5f7ff,#e9eef8 72%);color-scheme:light}
+body.theme-light .metric,body.theme-light .panel{background:linear-gradient(145deg,#ffffff,#f8faff);border-color:#d8e0ef;box-shadow:0 8px 24px #263b5b0b}
+body.theme-light .metric-primary{background:linear-gradient(135deg,#f0ebff,#e8efff);border-color:#c8b8f3}
+body.theme-light .metric span{color:#53627b}
+body.theme-light .metric strong{color:#172033}
+body.theme-light .metric small,body.theme-light .muted{color:#687894}
+body.theme-light .charges-panel{background:#fff;border-color:#d8e0ef}
+body.theme-light .charges-heading{color:#24324b}
+body.theme-light .charges-heading span,body.theme-light .charges-note{color:#71809a}
+body.theme-light .charges-breakdown span{color:#66758f}
+body.theme-light .charges-breakdown strong{color:#202d43}
+body.theme-light .tabs{background:#eef2fa;border-color:#d4ddec}
+body.theme-light .tab{color:#53627b}
+body.theme-light .tab span{color:#73819a}
+body.theme-light .tab.active{background:#e4dcff;color:#39256e;box-shadow:inset 0 0 0 1px #aa94e8}
+body.theme-light .table-wrap{border-color:#d8e0ed}
+body.theme-light thead{background:#eaf0fa}
+body.theme-light th{color:#52627e}
+body.theme-light td{color:#25334b;border-top-color:#e1e7f0}
+body.theme-light tbody tr:hover{background:#eaf0fa}
+body.theme-light .instrument{color:#3c2b70}
+body.theme-light .table-footer,body.theme-light .footer-note{color:#73819a}
+body.theme-light .page-footer{border-top-color:#d8e0ed}
+body.theme-light .button-outline{border-color:#c6d0e1;color:#34435d;background:#fff}
+body.theme-light .button-outline:hover{background:#f0f4fb}
+body.theme-light .empty{color:#71809a!important}
+body.theme-light .error{color:#c6284b}

@@ -69,7 +69,7 @@ PortfolioIntelligence is a read-only analysis layer over the broker position sna
 
 ### Position Intelligence milestones
 
-- **PI-1 — Position classification (current):** enrich positions using Kite's instrument master; classify equity, index options, stock options, index futures, stock futures, commodity options and commodity futures; normalize long/short/flat direction; expose classified open net positions.
+- **PI-1 — Position classification (current):** enrich positions using Kite's instrument master; classify equity, index options, stock options, index futures, stock futures, currency options/futures and commodity options/futures; normalize long/short/flat direction; expose classified open net positions.
 - **PI-2 — Shared analytics:** reusable trend, momentum, volatility, liquidity and risk/reward features with explicit data freshness.
 - **PI-3 — Equity and futures scorers:** asset-specific deterministic scoring and component explanations.
 - **PI-4 — Options scorer:** directional Greeks, IV, theta, gamma, expiry and liquidity-aware scoring.

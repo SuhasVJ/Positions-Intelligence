@@ -164,14 +164,14 @@ function initializePositionsPage() {
           ? position.pnl_multiple
           : (valueBasis > 0 ? Number(position.pnl || 0) / valueBasis : null);
         const progress = Number(position.pnl_progress_percent ??
-          (multiple === null ? 0 : Math.min(Math.abs(multiple) / 2, 1) * 100));
+          (multiple === null ? 0 : Math.min(Math.abs(multiple) / (Number(multiple) < 0 ? 1 : 2), 1) * 100));
         const direction = position.pnl_progress_direction ||
           (multiple === null ? "UNAVAILABLE" : multiple > 0 ? "PROFIT" : multiple < 0 ? "LOSS" : "FLAT");
         if (direction === "PROFIT" || direction === "LOSS") {
           row.classList.add(direction === "PROFIT" ? "pnl-progress-profit" : "pnl-progress-loss");
           row.style.setProperty("--pnl-progress", Math.max(0, Math.min(progress, 100)) + "%");
           const scaleTitle = "P&L multiple: " + Number(multiple).toFixed(2) +
-            "x. 1x = P&L equal to position value basis; 2x = 200%. Basis is |net quantity × average price|, not margin used.";
+            "x. Red reaches full at -1x; green reaches 50% at +1x and full at +2x. Basis is |net quantity × average price|, not margin used.";
           row.title = scaleTitle;
           row.dataset.pnlMultiple = String(multiple);
         }
@@ -221,7 +221,7 @@ function initializePositionsPage() {
             multipleLabel.className = "pnl-row-multiple " +
               (Number(multiple) > 0 ? "positive" : Number(multiple) < 0 ? "negative" : "neutral");
             multipleLabel.textContent = (Number(multiple) > 0 ? "+" : "") + Number(multiple).toFixed(2) + "x";
-            multipleLabel.title = "P&L multiple. 1x = 100% of position value basis; full bar = 2x.";
+            multipleLabel.title = "P&L multiple. Red full = -1x; green half = +1x; green full = +2x.";
             cell.classList.add("pnl-progress-value");
             cell.replaceChildren(amount, multipleLabel);
           }
